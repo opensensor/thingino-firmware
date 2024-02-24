@@ -28,9 +28,9 @@ BUILDROOT_DIR := $(SRC_DIR)/buildroot-$(BUILDROOT_VERSION)-themactep
 
 # toolchain
 ifeq ($(GCC),12)
-TOOLCHAIN_URL := https://github.com/themactep/thingino-firmware/releases/download/toolchain/thingino-toolchain_xburst1_musl_gcc12-linux-mipsel.tar.gz
+TOOLCHAIN_URL := https://github.com/themactep/thingino-firmware/releases/download/toolchain/thingino-toolchain_xburst1_gnu_gcc12-linux-mipsel.tar.gz
 else
-TOOLCHAIN_URL := https://github.com/themactep/thingino-firmware/releases/download/toolchain/thingino-toolchain_xburst1_musl_gcc13-linux-mipsel.tar.gz
+TOOLCHAIN_URL := https://github.com/themactep/thingino-firmware/releases/download/toolchain/thingino-toolchain_xburst1_gnu_gcc13-linux-mipsel.tar.gz
 GCC = 13
 endif
 
