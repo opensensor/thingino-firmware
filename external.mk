@@ -135,7 +135,7 @@ SOC_FAMILY := t41
 KERNEL_BRANCH := $(SOC_VENDOR)-t41
 endif
 
-THINGINO_KERNEL = "https://github.com/gtxaspec/openipc_linux/archive/$(KERNEL_BRANCH).tar.gz"
+THINGINO_KERNEL = "https://github.com/gtxaspec/openipc_linux/archive/refs/heads/ingenic-t31-4.4.94.tar.gz"
 
 SOC_MODEL_LESS_Z = $(subst z,,$(SOC_MODEL))
 
