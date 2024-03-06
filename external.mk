@@ -138,9 +138,9 @@ SOC_FAMILY := t41
 KERNEL_BRANCH := $(SOC_VENDOR)-t41
 endif
 
-KERNEL_SITE = https://github.com/gtxaspec/openipc_linux
+KERNEL_SITE = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94
 KERNEL_HASH = $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1)
-THINGINO_KERNEL = https://github.com/gtxaspec/openipc_linux/archive/$(KERNEL_HASH).tar.gz
+THINGINO_KERNEL = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94/archive/refs/heads/master.tar.gz
 THINGINO_TOOLCHAIN = https://github.com/themactep/thingino-firmware/releases/download/toolchain/thingino-toolchain_xburst1_musl_gcc13-linux-mipsel.tar.gz
 
 SENSOR_MODEL = $(subst z,,$(BR2_SENSOR_MODEL))
