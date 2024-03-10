@@ -4,8 +4,7 @@
 #
 ################################################################################
 
-THINGINO_LIVE555_VERSION = 2024.02.28
-THINGINO_LIVE555_SOURCE = live.$(THINGINO_LIVE555_VERSION).tar.gz
+THINGINO_LIVE555_SOURCE = live555-latest.tar.gz
 THINGINO_LIVE555_SITE = http://www.live555.com/liveMedia/public
 # There is a COPYING file with the GPL-3.0 license text, but none of
 # the source files appear to be released under GPL-3.0, and the
@@ -44,7 +43,7 @@ THINGINO_LIVE555_CFLAGS += -DLOCALE_NOT_USED
 endif
 
 define THINGINO_LIVE555_CONFIGURE_CMDS
-	echo 'COMPILE_OPTS = $$(INCLUDES) -I. -DSOCKLEN_T=socklen_t -DNO_STD_LIB $(THINGINO_LIVE555_CFLAGS)' >> $(@D)/config.$(THINGINO_LIVE555_CONFIG_TARGET)
+	echo 'COMPILE_OPTS = $$(INCLUDES) -I. -DSOCKLEN_T=socklen_t -DALLOW_RTSP_SERVER_PORT_REUSE -DNO_STD_LIB $(THINGINO_LIVE555_CFLAGS)' >> $(@D)/config.$(THINGINO_LIVE555_CONFIG_TARGET)
 	echo 'C_COMPILER = $(TARGET_CC)' >> $(@D)/config.$(THINGINO_LIVE555_CONFIG_TARGET)
 	echo 'CPLUSPLUS_COMPILER = $(TARGET_CXX)' >> $(@D)/config.$(THINGINO_LIVE555_CONFIG_TARGET)
 
