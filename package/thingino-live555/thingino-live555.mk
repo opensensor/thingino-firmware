@@ -4,6 +4,7 @@
 #
 ################################################################################
 
+THINGINO_LIVE555_VERSION = latest
 THINGINO_LIVE555_SOURCE = live555-latest.tar.gz
 THINGINO_LIVE555_SITE = http://www.live555.com/liveMedia/public
 # There is a COPYING file with the GPL-3.0 license text, but none of
@@ -68,6 +69,7 @@ endef
 
 define THINGINO_LIVE555_INSTALL_TARGET_CMDS
 	$(TARGET_MAKE_ENV) $(MAKE) DESTDIR=$(TARGET_DIR) PREFIX=/usr -C $(@D) install
+	cp $(@D)/testProgs/openRTSP $(TARGET_DIR)/usr/bin/
 endef
 
 $(eval $(generic-package))

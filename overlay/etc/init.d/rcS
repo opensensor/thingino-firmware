@@ -12,11 +12,22 @@ export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Start all init scripts in /etc/init.d
 # executing them in numerical order.
-for i in /etc/init.d/S??*; do
-	# Ignore dangling symlinks (if any).
-	[ ! -f "$i" ] && continue
+execute_and_log() {
+	script="$1"
+	if /bin/sh -c "$script start" > /tmp/initlog 2>&1; then
+		cat /tmp/initlog | logger -t $script
+		cat /tmp/initlog  # Output to console
+	else
+		cat /tmp/initlog | logger -t $script
+		cat /tmp/initlog  # Output to console
+	fi
+	rm -f /tmp/initlog
+}
 
-	/bin/sh -c "$i start" 2>&1 | tee >(logger -t $i)
+for i in /etc/init.d/S??*; do
+	[ ! -f "$i" ] && continue  # Ignore dangling symlinks (if any).
+	execute_and_log "$i" &
+	wait
 done
 
 exit 0

@@ -143,7 +143,8 @@ KERNEL_HASH = $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | 
 THINGINO_KERNEL = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94/archive/refs/heads/4.4-latest.tar.gz
 THINGINO_TOOLCHAIN = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94/releases/download/4.4.latest/mipsel-thingino-linux-musl_sdk-buildroot.tar.gz
 
-SENSOR_MODEL = $(subst z,,$(BR2_SENSOR_MODEL))
+
+SENSOR_MODEL = $(subst ",,$(BR2_SENSOR_MODEL))
 SOC_MODEL_LESS_Z = $(subst z,,$(SOC_MODEL))
 
 export SOC_VENDOR
@@ -152,7 +153,6 @@ export SOC_MODEL
 export SOC_MODEL_LESS_Z
 export SENSOR_MODEL
 export THINGINO_KERNEL
-export THINGINO_TOOLCHAIN
 
 ifneq ($(BR2_SOC_INGENIC_DUMMY),y)
 # include makefiles from packages
