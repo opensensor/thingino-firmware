@@ -1,11 +1,12 @@
 INGENIC_SDK_SITE_METHOD = git
 INGENIC_SDK_SITE = https://github.com/opensensor/ingenic-sdk
-INGENIC_SDK_VERSION = $(shell git ls-remote $(INGENIC_SDK_SITE) linux-4.4 | head -1 | cut -f1)
+INGENIC_SDK_VERSION = $(shell git ls-remote $(INGENIC_SDK_SITE) multi-kernel-II | head -1 | cut -f1)
 
 INGENIC_SDK_LICENSE = GPL-3.0
 INGENIC_SDK_LICENSE_FILES = LICENSE
 
 INGENIC_SDK_MODULE_MAKE_OPTS = \
+	KERNEL_VERSION=4.4 \
 	SOC_FAMILY=$(SOC_FAMILY) \
 	SENSOR_MODEL=$(SENSOR_MODEL) \
 	INSTALL_MOD_PATH=$(TARGET_DIR) \
