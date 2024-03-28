@@ -141,7 +141,7 @@ endif
 KERNEL_SITE = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94
 KERNEL_HASH = $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1)
 THINGINO_KERNEL = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94/archive/refs/heads/4.4-latest.tar.gz
-
+KERNEL_VERSION ?= 4.4
 
 SENSOR_MODEL = $(subst ",,$(BR2_SENSOR_MODEL))
 SOC_MODEL_LESS_Z = $(subst z,,$(SOC_MODEL))
@@ -152,6 +152,7 @@ export SOC_MODEL
 export SOC_MODEL_LESS_Z
 export SENSOR_MODEL
 export THINGINO_KERNEL
+export KERNEL_VERSION
 
 ifneq ($(BR2_SOC_INGENIC_DUMMY),y)
 # include makefiles from packages
