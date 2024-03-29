@@ -7,108 +7,143 @@ SOC_MODEL := t31x
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T10L),y)
 SOC_MODEL := t10l
+SOC_RAM := 64
 BR2_SOC_INGENIC_T10=y
 else ifeq ($(BR2_SOC_INGENIC_T10N),y)
 SOC_MODEL := t10n
+SOC_RAM := 64
 BR2_SOC_INGENIC_T10=y
 else ifeq ($(BR2_SOC_INGENIC_T10A),y)
 SOC_MODEL := t10a
+SOC_RAM := 64
 BR2_SOC_INGENIC_T10=y
 else ifeq ($(BR2_SOC_INGENIC_T20L),y)
 SOC_MODEL := t20l
+SOC_RAM := 64
 BR2_SOC_INGENIC_T20=y
 else ifeq ($(BR2_SOC_INGENIC_T20N),y)
 SOC_MODEL := t20n
+SOC_RAM := 64
 BR2_SOC_INGENIC_T20=y
 else ifeq ($(BR2_SOC_INGENIC_T20X),y)
 SOC_MODEL := t20x
+SOC_RAM := 128
 BR2_SOC_INGENIC_T20=y
 else ifeq ($(BR2_SOC_INGENIC_T21L),y)
 SOC_MODEL := t21l
+SOC_RAM := 64
 BR2_SOC_INGENIC_T21=y
 else ifeq ($(BR2_SOC_INGENIC_T21N),y)
 SOC_MODEL := t21n
+SOC_RAM := 64
 BR2_SOC_INGENIC_T21=y
 else ifeq ($(BR2_SOC_INGENIC_T21X),y)
 SOC_MODEL := t21x
+SOC_RAM := 128
 BR2_SOC_INGENIC_T21=y
 else ifeq ($(BR2_SOC_INGENIC_T21Z),y)
 SOC_MODEL := t21zn
+SOC_RAM := 64
 BR2_SOC_INGENIC_T21=y
 else ifeq ($(BR2_SOC_INGENIC_T21ZL),y)
 SOC_MODEL := t21zl
+SOC_RAM := 64
 BR2_SOC_INGENIC_T21=y
 else ifeq ($(BR2_SOC_INGENIC_T23N),y)
 SOC_MODEL := t23n
+SOC_RAM := 64
 BR2_SOC_INGENIC_T23=y
 else ifeq ($(BR2_SOC_INGENIC_T23ZN),y)
 SOC_MODEL := t23zn
+SOC_RAM := 64
 BR2_SOC_INGENIC_T23=y
 else ifeq ($(BR2_SOC_INGENIC_T30L),y)
 SOC_MODEL := t30l
+SOC_RAM := 64
 BR2_SOC_INGENIC_T30=y
 else ifeq ($(BR2_SOC_INGENIC_T30N),y)
 SOC_MODEL := t30n
+SOC_RAM := 64
 BR2_SOC_INGENIC_T30=y
 else ifeq ($(BR2_SOC_INGENIC_T30X),y)
 SOC_MODEL := t30x
+SOC_RAM := 128
 BR2_SOC_INGENIC_T30=y
 else ifeq ($(BR2_SOC_INGENIC_T30A),y)
 SOC_MODEL := t30a
+SOC_RAM := 128
 BR2_SOC_INGENIC_T30=y
 else ifeq ($(BR2_SOC_INGENIC_T31L),y)
 SOC_MODEL := t31l
+SOC_RAM := 64
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31LC),y)
 SOC_MODEL := t31lc
+SOC_RAM := 64
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31N),y)
 SOC_MODEL := t31n
+SOC_RAM := 64
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31X),y)
 SOC_MODEL := t31x
+SOC_RAM := 128
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31A),y)
 SOC_MODEL := t31a
+SOC_RAM := 128
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31AL),y)
 SOC_MODEL := t31al
+SOC_RAM := 128
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31ZL),y)
 SOC_MODEL := t31zl
+SOC_RAM := 64
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31ZX),y)
 SOC_MODEL := t31zx
+SOC_RAM := 128
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T31XL),y)
 SOC_MODEL := t31xl
+SOC_RAM := 64
 BR2_SOC_INGENIC_T31=y
 else ifeq ($(BR2_SOC_INGENIC_T40N),y)
 SOC_MODEL := t40n
+SOC_RAM := 128
 BR2_SOC_INGENIC_T40=y
 else ifeq ($(BR2_SOC_INGENIC_T40XP),y)
 SOC_MODEL := t40xp
+SOC_RAM := 256
 BR2_SOC_INGENIC_T40=y
 else ifeq ($(BR2_SOC_INGENIC_T40A),y)
 SOC_MODEL := t40a
+SOC_RAM := 128
 BR2_SOC_INGENIC_T40=y
 else ifeq ($(BR2_SOC_INGENIC_T41LQ),y)
 SOC_MODEL := t41lq
+SOC_RAM := 64
 BR2_SOC_INGENIC_T41=y
 else ifeq ($(BR2_SOC_INGENIC_T41NQ),y)
 SOC_MODEL := t41nq
+SOC_RAM := 128
 BR2_SOC_INGENIC_T41=y
 else ifeq ($(BR2_SOC_INGENIC_T41ZL),y)
 SOC_MODEL := t41zl
+SOC_RAM := 64
 BR2_SOC_INGENIC_T41=y
 else ifeq ($(BR2_SOC_INGENIC_T41ZN),y)
 SOC_MODEL := t41zn
+SOC_RAM := 128
 BR2_SOC_INGENIC_T41=y
 else ifeq ($(BR2_SOC_INGENIC_T41ZX),y)
 SOC_MODEL := t41zx
+SOC_RAM := 256
 BR2_SOC_INGENIC_T41=y
 else ifeq ($(BR2_SOC_INGENIC_T41A),y)
 SOC_MODEL := t41a
+SOC_RAM := 512
 BR2_SOC_INGENIC_T41=y
 endif
 
@@ -138,10 +173,23 @@ SOC_FAMILY := t41
 KERNEL_BRANCH := $(SOC_VENDOR)-t41
 endif
 
+ifeq ($(BR2_PACKAGE_RAPTOR_IPC),y)
+STREAMER := raptor
+else ifeq ($(BR2_PACKAGE_PRUDYNT_T),y)
+STREAMER := prudynt
+endif
+
+KERNEL_VERSION ?= 3.10
+
+ifeq ($(KERNEL_VERSION),3.10)
+KERNEL_SITE = https://github.com/gtxaspec/openipc_linux.git
+KERNEL_BRANCH = ingenic-t31
+else ifeq ($(KERNEL_VERSION),4.4)
 KERNEL_SITE = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94
+KERNEL_BRANCH = 4.4-latest
+endif
 KERNEL_HASH = $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1)
-THINGINO_KERNEL = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94/archive/refs/heads/4.4-latest.tar.gz
-KERNEL_VERSION ?= 4.4
+THINGINO_KERNEL = $(KERNEL_SITE)/archive/$(KERNEL_HASH).tar.gz
 
 SENSOR_MODEL = $(subst ",,$(BR2_SENSOR_MODEL))
 SOC_MODEL_LESS_Z = $(subst z,,$(SOC_MODEL))
@@ -150,9 +198,11 @@ export SOC_VENDOR
 export SOC_FAMILY
 export SOC_MODEL
 export SOC_MODEL_LESS_Z
+export SOC_RAM
 export SENSOR_MODEL
 export THINGINO_KERNEL
 export KERNEL_VERSION
+export STREAMER
 
 ifneq ($(BR2_SOC_INGENIC_DUMMY),y)
 # include makefiles from packages
