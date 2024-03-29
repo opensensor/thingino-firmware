@@ -179,13 +179,21 @@ else ifeq ($(BR2_PACKAGE_PRUDYNT_T),y)
 STREAMER := prudynt
 endif
 
-KERNEL_VERSION ?= 3.10
+# default to older kernel if none set
+ifneq ($(KERNEL_VERSION_3)$(KERNEL_VERSION_4),y)
+$(info Defaulting to kernel 3.x)
+KERNEL_VERSION_3 = y
+endif
 
-ifeq ($(KERNEL_VERSION),3.10)
+ifeq ($(KERNEL_VERSION_3),y)
+$(info Building for kernel 3.x)
+KERNEL_VERSION = 3.10
 KERNEL_SITE = https://github.com/gtxaspec/openipc_linux.git
 KERNEL_BRANCH = ingenic-t31
-else ifeq ($(KERNEL_VERSION),4.4)
-KERNEL_SITE = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94
+else ifeq ($(KERNEL_VERSION_4),y)
+$(info Building for kernel 4.x)
+KERNEL_VERSION = 4.4
+KERNEL_SITE = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94.git
 KERNEL_BRANCH = 4.4-latest
 endif
 KERNEL_HASH = $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1)
@@ -201,6 +209,9 @@ export SOC_MODEL_LESS_Z
 export SOC_RAM
 export SENSOR_MODEL
 export THINGINO_KERNEL
+export KERNEL_SITE
+export KERNEL_BRANCH
+export KERNEL_HASH
 export KERNEL_VERSION
 export STREAMER
 
