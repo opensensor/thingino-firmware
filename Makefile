@@ -35,27 +35,27 @@ BR2_MAKE = $(MAKE) -C $(BR2_EXTERNAL)/buildroot BR2_EXTERNAL=$(BR2_EXTERNAL) O=$
 # handle the board
 include $(BR2_EXTERNAL)/board.mk
 
-# read camera config file
-include $(CAMERA_CONFIG_REAL)
-
 # include device tree makefile
 include $(BR2_EXTERNAL)/external.mk
 
 # hardcoded variables
 WGET := wget --quiet --no-verbose --retry-connrefused --continue --timeout=3
 
+ifeq ($(shell command -v figlet),)
+FIGLET := echo
+else
+FIGLET := $(shell command -v figlet) -t -f pagga
+endif
+
 U_BOOT_GITHUB_URL := https://github.com/gtxaspec/u-boot-ingenic/releases/download/latest
 U_BOOT_BIN  = $(OUTPUT_DIR)/images/u-boot-$(SOC_MODEL_LESS_Z).bin
+U_BOOT_ENV_BIN := $(OUTPUT_DIR)/images/uenv.bin
 KERNEL_BIN := $(OUTPUT_DIR)/images/uImage
 ROOTFS_BIN := $(OUTPUT_DIR)/images/rootfs.squashfs
 ROOTFS_TAR := $(OUTPUT_DIR)/images/rootfs.tar
 
 # 0x0008000, 32K, 32_768
 ALIGN_BLOCK       := 32768
-# 0x0800000, 8M, 8_388_608
-SIZE_8M           := 8388608
-# 0x1000000, 16M, 16_777_216
-SIZE_16M          := 16777216
 
 # 0x0, from the very beginning
 U_BOOT_OFFSET     := 0
@@ -67,9 +67,13 @@ U_BOOT_ENV_SIZE   := 65536
 # U_BOOT_ENV_SIZE + U_BOOT_ENV_SIZE, 0x40000 + 0x10000 = 0x50000 = 327_680
 KERNEL_OFFSET     := 327680
 # SIZE_8M  - KERNEL_OFFSET, 0x0800000 - 0x0050000 = 0x7B0000 = 8_060_928
-SIZE_8M_NOBOOT    := 8060928
+# SIZE_8M_NOBOOT    := 8060928
 # SIZE_16M - KERNEL_OFFSET, 0x1000000 - 0x0050000 = 0xFB0000 = 16_449_536
-SIZE_16M_NOBOOT   := 16449536
+# SIZE_16M_NOBOOT   := 16449536
+# SIZE_32M - KERNEL_OFFSET, 0x2000000 - 0x0050000 = 0x1FB0000 = 33_226_752
+# SIZE_32M_NOBOOT   := 33226752
+
+FLASH_SIZE_NOBOOT = $(shell echo $(FLASH_SIZE) - $(KERNEL_OFFSET) | bc)
 
 # create a full binary file suffixed with the time of the last modification to either uboot, kernel, or rootfs
 FIRMWARE_NAME_FULL = thingino-$(CAMERA)-$(shell \
@@ -103,21 +107,21 @@ FIRMWARE_BIN_FULL_SIZE = $(shell stat -c%s $(FIRMWARE_BIN_FULL))
 FIRMWARE_BIN_NOBOOT_SIZE = $(shell stat -c%s $(FIRMWARE_BIN_NOBOOT))
 
 .PHONY: all toolchain sdk bootstrap clean defconfig distclean help \
-	pack pack_full pack_update pad pad_full pad_update reconfig \
-	upload_tftp upload_sdcard upgrade_ota br-%
+	pack pack_full pack_update pad pad_full pad_update prepare_config \
+	reconfig upload_tftp upload_sdcard upgrade_ota br-%
 
 all: $(OUTPUT_DIR)/.config
 	$(info --------------> all)
 #ifndef CAMERA
 #	$(MAKE) CAMERA=$(CAMERA) $@
 #endif
-	@if command -v figlet >/dev/null; then figlet -t -f pagga $(CAMERA); fi;
+	@$(FIGLET) $(CAMERA)
 	# Generate .config file
 	if ! test -f $(OUTPUT_DIR)/.config; then $(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) defconfig; fi
 #	# Add local.mk to the building directory to override settings
 #	if test -f $(BR2_EXTERNAL)/local.mk; then cp -f $(BR2_EXTERNAL)/local.mk $(OUTPUT_DIR)/local.mk; fi
 	$(BR2_MAKE) all
-	@if command -v figlet >/dev/null; then figlet -t -f pagga "FINE"; fi;
+	@$(FIGLET) "FINE"
 
 # install prerequisites
 bootstrap:
@@ -127,56 +131,56 @@ ifneq ($(shell id -u), 0)
 else
 	@DEBIAN_FRONTEND=noninteractive apt-get update
 	@DEBIAN_FRONTEND=noninteractive apt-get -y install \
-		build-essential bc bison cpio curl file flex git \
+		build-essential bc bison cpio curl file flex gawk git \
 		libncurses-dev make rsync unzip wget whiptail
 endif
 
 ### Configuration
 
-FRAGMENTS = $(shell awk '/FRAG:/ {$$1=$$1;gsub(/^.+:\s*/,"");print}' $(CAMERA_CONFIG_REAL))
+FRAGMENTS = $(shell awk '/FRAG:/ {$$1=$$1;gsub(/^.+:\s*/,"");print}' $(MODULE_CONFIG_REAL))
 
-# Configure buildroot for a particular board
-defconfig:
-	$(info --------------> defconfig)
+# Assemble config from bits and pieces
+prepare_config:
+	# create output directory
 	$(info * make OUTPUT_DIR $(OUTPUT_DIR))
 	mkdir -p $(OUTPUT_DIR)
+	# delete older config
 	$(info * remove existing .config file)
 	rm -rvf $(OUTPUT_DIR)/.config
-	$(info * add fragments FRAGMENTS=$(FRAGMENTS))
+	# gather fragments of a new config
+	$(info * add fragments FRAGMENTS=$(FRAGMENTS) from $(MODULE_CONFIG_REAL))
 	for i in $(FRAGMENTS); do \
 		echo "** add configs/fragments/$$i.fragment"; \
 		cat configs/fragments/$$i.fragment >>$(OUTPUT_DIR)/.config; \
 		echo >>$(OUTPUT_DIR)/.config; \
 	done
+	# add module configuration
+	cat $(MODULE_CONFIG_REAL) >>$(OUTPUT_DIR)/.config
+	# add camera configuration
 	cat $(CAMERA_CONFIG_REAL) >>$(OUTPUT_DIR)/.config
-	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
-	# $(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) defconfig
-	# @if test -f $(BR2_EXTERNAL)/local.mk; then cp -f $(BR2_EXTERNAL)/local.mk $(OUTPUT_DIR)/local.mk; fi
-
-defconfig_classic:
-	$(info --------------> defconfig_classic)
-	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) defconfig
 	# Add local.mk to the building directory to override settings
 	if test -f $(BR2_EXTERNAL)/local.mk; then cp -f $(BR2_EXTERNAL)/local.mk $(OUTPUT_DIR)/local.mk; fi
 
+# Configure buildroot for a particular board
+defconfig: prepare_config
+	cp $(OUTPUT_DIR)/.config $(OUTPUT_DIR)/.config_original
+	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
+	# $(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) defconfig
+
 # Call configurator UI
 menuconfig: $(OUTPUT_DIR)/.config
-	$(info --------------> menuconfig)
 	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) menuconfig
 
 # Permanently save changes to the defconfig
 saveconfig:
-	$(info --------------> saveconfig)
 	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) savedefconfig
 
 ### Files
 
 clean:
-	$(info --------------> clean)
 	rm -rf $(OUTPUT_DIR)/target
 
 distclean:
-	$(info --------------> distclean)
 	if [ -d "$(OUTPUT_DIR)" ]; then rm -rf $(OUTPUT_DIR); fi
 
 delete_bin_full:
@@ -186,37 +190,30 @@ delete_bin_update:
 	if [ -f $(FIRMWARE_BIN_NOBOOT) ]; then rm $(FIRMWARE_BIN_NOBOOT); fi
 
 pack: pack_full
-	$(info --------------> pack)
 
 pack_full: $(FIRMWARE_BIN_FULL)
-	$(info --------------> pack_full)
-	if [ $(FIRMWARE_BIN_FULL_SIZE) -gt $(SIZE_8M) ]; \
-	then \
-	dd if=/dev/zero bs=$(SIZE_16M) skip=0 count=1 status=none | tr '\000' '\377' > $(OUTPUT_DIR)/images/padded; \
-	dd if=$(FIRMWARE_BIN_FULL) bs=$(FIRMWARE_BIN_FULL_SIZE) seek=0 count=1 of=$(OUTPUT_DIR)/images/padded conv=notrunc status=none; \
-	mv $(OUTPUT_DIR)/images/padded $(FIRMWARE_BIN_FULL); \
-	fi
+	@if [ $(FIRMWARE_BIN_FULL_SIZE) -gt $(FLASH_SIZE) ]; then $(FIGLET) "OVERSIZE"; fi
+#	dd if=/dev/zero bs=$(SIZE_16M) skip=0 count=1 status=none | tr '\000' '\377' > $(OUTPUT_DIR)/images/padded; \
+#	dd if=$(FIRMWARE_BIN_FULL) bs=$(FIRMWARE_BIN_FULL_SIZE) seek=0 count=1 of=$(OUTPUT_DIR)/images/padded conv=notrunc status=none; \
+#	mv $(OUTPUT_DIR)/images/padded $(FIRMWARE_BIN_FULL); \
+#	fi
 
 pack_update: $(FIRMWARE_BIN_NOBOOT)
-	$(info --------------> pack_update)
-	if [ $(FIRMWARE_BIN_NOBOOT_SIZE) -gt $(SIZE_8M_NOBOOT) ]; \
-	then \
-	dd if=/dev/zero bs=$(SIZE_16M_NOBOOT) skip=0 count=1 status=none | tr '\000' '\377' > $(OUTPUT_DIR)/images/padded; \
-	dd if=$(FIRMWARE_BIN_NOBOOT) bs=$(FIRMWARE_BIN_NOBOOT_SIZE) seek=0 count=1 of=$(OUTPUT_DIR)/images/padded conv=notrunc status=none; \
-	mv $(OUTPUT_DIR)/images/padded $(FIRMWARE_BIN_NOBOOT); \
-	fi
+	if [ $(FIRMWARE_BIN_NOBOOT_SIZE) -gt $(FLASH_SIZE_NOBOOT) ]; then $(FIGLET) "OVERSIZE"; fi
+#	then \
+#	dd if=/dev/zero bs=$(SIZE_16M_NOBOOT) skip=0 count=1 status=none | tr '\000' '\377' > $(OUTPUT_DIR)/images/padded; \
+#	dd if=$(FIRMWARE_BIN_NOBOOT) bs=$(FIRMWARE_BIN_NOBOOT_SIZE) seek=0 count=1 of=$(OUTPUT_DIR)/images/padded conv=notrunc status=none; \
+#	mv $(OUTPUT_DIR)/images/padded $(FIRMWARE_BIN_NOBOOT); \
+#	fi
 
 pad: pad_full
-	$(info --------------> pad)
 
 pad_full: $(FIRMWARE_BIN_FULL)
-	$(info --------------> pad_full)
 	dd if=/dev/zero bs=$(SIZE_16M) skip=0 count=1 status=none | tr '\000' '\377' > $(OUTPUT_DIR)/images/padded; \
 	dd if=$(FIRMWARE_BIN_FULL) bs=$(FIRMWARE_BIN_FULL_SIZE) seek=0 count=1 of=$(OUTPUT_DIR)/images/padded conv=notrunc status=none; \
 	mv $(OUTPUT_DIR)/images/padded $(FIRMWARE_BIN_FULL);
 
 pad_update: $(FIRMWARE_BIN_NOBOOT)
-	$(info --------------> pad_update)
 	dd if=/dev/zero bs=$(SIZE_16M_NOBOOT) skip=0 count=1 status=none | tr '\000' '\377' > $(OUTPUT_DIR)/images/padded; \
 	dd if=$(FIRMWARE_BIN_NOBOOT) bs=$(FIRMWARE_BIN_NOBOOT_SIZE) seek=0 count=1 of=$(OUTPUT_DIR)/images/padded conv=notrunc status=none; \
 	mv $(OUTPUT_DIR)/images/padded $(FIRMWARE_BIN_NOBOOT);
@@ -272,7 +269,6 @@ br-%-dirclean:
 br-%:
 	$(BR2_MAKE) $(subst br-,,$@)
 
-
 # create output directory
 $(OUTPUT_DIR):
 	mkdir -p $(OUTPUT_DIR)
@@ -286,8 +282,14 @@ $(SRC_DIR):
 
 # download bootloader
 $(U_BOOT_BIN):
-	$(info U_BOOT_BIN:          $@)
 	$(WGET) -O $@ $(U_BOOT_GITHUB_URL)/u-boot-$(SOC_MODEL_LESS_Z).bin
+
+$(U_BOOT_ENV_BIN):
+ifneq ($(U_BOOT_ENV_TXT),)
+	if [ -f "$(U_BOOT_ENV_TXT)" ]; then \
+	$(SCRIPTS_DIR)/mkenvimage -s 0x10000 -o $@ $(U_BOOT_ENV_TXT); \
+	fi
+endif
 
 # rebuild Linux kernel
 $(KERNEL_BIN):
@@ -312,16 +314,14 @@ $(ROOTFS_TAR):
 	$(BR2_MAKE) all
 #	mv -vf $(OUTPUT_DIR)/images/rootfs.tar $@
 
-$(FIRMWARE_BIN_FULL): $(U_BOOT_BIN) $(KERNEL_BIN) $(ROOTFS_BIN)
-	$(info --------------> FIRMWARE_BIN_FULL=$(FIRMWARE_BIN_FULL))
-	dd if=/dev/zero bs=$(SIZE_8M) skip=0 count=1 status=none | tr '\000' '\377' > $@
+$(FIRMWARE_BIN_FULL): $(U_BOOT_BIN) $(U_BOOT_ENV_BIN) $(KERNEL_BIN) $(ROOTFS_BIN)
+	dd if=/dev/zero bs=$(FLASH_SIZE) skip=0 count=1 status=none | tr '\000' '\377' > $@
 	dd if=$(U_BOOT_BIN) bs=$(U_BOOT_SIZE) seek=$(U_BOOT_OFFSET) count=1 of=$@ conv=notrunc status=none
 	dd if=$(KERNEL_BIN) bs=$(KERNEL_SIZE) seek=$(KERNEL_OFFSET)B count=1 of=$@ conv=notrunc status=none
 	dd if=$(ROOTFS_BIN) bs=$(ROOTFS_SIZE) seek=$(ROOTFS_OFFSET)B count=1 of=$@ conv=notrunc status=none
 
 $(FIRMWARE_BIN_NOBOOT): $(KERNEL_BIN) $(ROOTFS_BIN)
-	$(info --------------> FIRMWARE_BIN_NOBOOT=$(FIRMWARE_BIN_NOBOOT))
-	dd if=/dev/zero bs=$(SIZE_8M_NOBOOT) skip=0 count=1 status=none | tr '\000' '\377' > $@
+	dd if=/dev/zero bs=$(FLASH_SIZE_NOBOOT) skip=0 count=1 status=none | tr '\000' '\377' > $@
 	dd if=$(KERNEL_BIN) bs=$(KERNEL_SIZE) seek=0 count=1 of=$@ conv=notrunc status=none
 	dd if=$(ROOTFS_BIN) bs=$(ROOTFS_SIZE) seek=$(KERNEL_SIZE_ALIGNED)B count=1 of=$@ conv=notrunc status=none
 

@@ -42,6 +42,8 @@ jobs:
         toolchain-version:
           - toolchain_xburst1_musl_gcc13
           - toolchain_xburst1_musl_gcc12
+          - toolchain_xburst2_musl_gcc13
+          - toolchain_xburst2_musl_gcc12
           - toolchain_xburst1_gnu_gcc13
           - toolchain_xburst1_gnu_gcc12
 

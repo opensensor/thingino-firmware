@@ -1,3 +1,5 @@
+$(info --- FILE: board.mk ---)
+
 LIST_OF_CAMERAS := $(shell find ./configs/cameras/* | sort | sed -E "s/^\.\/configs\/cameras\/(.*)/'cameras\/\1' '\1'/")
 LIST_OF_CONFIGS := $(shell find ./configs/modules/* | sort | sed -E "s/^\.\/configs\/modules\/(.*)_defconfig/'modules\/\1_defconfig' '\1'/")
 BUILD_MEMO := /tmp/thingino-board.$(shell ps -o ppid $$PPID | tail -1 | xargs)
@@ -56,6 +58,21 @@ $(info * get real path to the config file)
 CAMERA_CONFIG_REAL = $(shell realpath $(BR2_EXTERNAL)/configs/$(CAMERA_CONFIG))
 $(info CAMERA_CONFIG_REAL = $(CAMERA_CONFIG_REAL))
 
+MODULE_CONFIG = $(shell awk '/MODULE:/ {$$1=$$1;gsub(/^.+:\s*/,"");print}' $(CAMERA_CONFIG_REAL))
+ifeq ($(MODULE_CONFIG),)
+MODULE_CONFIG_REAL = $(CAMERA_CONFIG_REAL)
+else
+MODULE_CONFIG_REAL = $(shell realpath $(BR2_EXTERNAL)/configs/modules/$(MODULE_CONFIG))
+endif
+
+$(info MODULE_CONFIG = $(MODULE_CONFIG))
+
 $(info * restore CAMERA for CAMERA_CONFIG)
 CAMERA = $(shell basename $(CAMERA_CONFIG_REAL) | sed s/_defconfig//)
 $(info CAMERA = $(CAMERA))
+
+# read camera config file
+include $(CAMERA_CONFIG_REAL)
+
+# read module config file
+include $(MODULE_CONFIG_REAL)
