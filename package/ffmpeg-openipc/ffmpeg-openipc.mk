@@ -28,9 +28,9 @@ FFMPEG_OPENIPC_CONF_OPTS = \
 	--disable-swresample \
 	--disable-avdevice \
 	--disable-filters \
-	--disable-encoders \
+	--disable-encoders --enable-encoder=aac,mpeg4 \
 	--disable-decoders --enable-decoder=h264,hevc \
-	--disable-muxers --enable-muxer=flv,rtsp \
+	--disable-muxers --enable-muxer=flv,rtsp,mp4 \
 	--disable-demuxers --enable-demuxer=h264,rtsp \
 	--disable-parsers --enable-parser=h264,hevc \
 	--disable-protocols --enable-protocol=file,rtmp,tcp \
