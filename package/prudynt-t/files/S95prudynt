@@ -13,7 +13,7 @@ load_daemon() {
 }
 
 start() {
-	load_daemon
+	# load_daemon
 }
 
 stop() {
@@ -35,7 +35,7 @@ restart() {
 }
 
 reload() {
-	load_daemon
+	# load_daemon
 }
 
 case "$1" in
