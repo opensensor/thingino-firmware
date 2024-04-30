@@ -35,8 +35,8 @@ menuconfig BR2_THINGINO_SYSTEM_PACKAGES
 
 if BR2_THINGINO_SYSTEM_PACKAGES
 	source "$BR2_EXTERNAL_THINGINO_PATH/package/ingenic-diag-tools/Config.in"
-	source "$BR2_EXTERNAL_THINGINO_PATH/package/ingenic-sdk/Config.in"
-	source "$BR2_EXTERNAL_THINGINO_PATH/package/ingenic-pwm/Config.in"
+	#source "$BR2_EXTERNAL_THINGINO_PATH/package/ingenic-sdk/Config.in"
+	#source "$BR2_EXTERNAL_THINGINO_PATH/package/ingenic-pwm/Config.in"
 	source "$BR2_EXTERNAL_THINGINO_PATH/package/webui/Config.in"
 endif
 
