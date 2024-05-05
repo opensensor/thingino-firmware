@@ -219,7 +219,7 @@ else ifeq ($(KERNEL_VERSION_4),y)
 $(info Building for kernel 4.x)
 KERNEL_VERSION = 4.4
 KERNEL_SITE = https://github.com/matteius/ingenic-t31-zrt-kernel-4.4.94
-KERNEL_BRANCH = 4.6-linux-diffing-V
+KERNEL_BRANCH = 4.9-linux-diffing
 endif
 KERNEL_HASH = $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1)
 $(info KERNEL_HASH=$(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1))
@@ -262,9 +262,9 @@ endif
 
 ifeq ($(BR2_SOC_INGENIC_T31),y)
 ifeq ($(KERNEL_VERSION_4),y)
-SDK_LIBC_VERSION := 4.7.2
+SDK_LIBC_VERSION := 5.4.0
 SDK_LIBC_NAME := uclibc
-SDK_VERSION := 1.1.5.2
+SDK_VERSION := 1.1.6
 endif
 endif
 
