@@ -3,10 +3,17 @@
 config="/etc/imp.conf"
 
 check_imp() {
-	echo -n "Establishing connection ..."
+	echo -n "Connecting to libimp-control: "
 	i=0
+	platform=$(soc -f)
+	if [ "$platform" = "t10" ] || [ "$platform" = "t20" ]; then
+		isp_path="/proc/jz/isp/isp_info"
+	else
+		isp_path="/proc/jz/isp/isp-fs"
+	fi
+
 	while :; do
-		grep -q running /proc/jz/isp/isp-fs &&
+		grep -Eq "running|Software" $isp_path &&
 			imp-control getdeviceid > /dev/null &&
 			echo " OK" && return
 		echo -n "."
@@ -18,7 +25,7 @@ check_imp() {
 
 start() {
 	check_imp
-	echo -n "Restoring IMP Configuration:"
+	echo -n " Restoring IMP Configuration: "
 	if [ -f "$config" ]; then
 		echo
 		while read -r line; do
@@ -27,7 +34,7 @@ start() {
 		done < $config
 		echo "Done"
 	else
-		echo "DISABLED"
+		echo "Disabled"
 		return
 	fi
 }

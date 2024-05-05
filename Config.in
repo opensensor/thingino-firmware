@@ -1,7 +1,6 @@
 menu "Thingino Firmware"
 
 source "$BR2_EXTERNAL_THINGINO_PATH/Config.soc.in"
-source "$BR2_EXTERNAL_THINGINO_PATH/Config.sensor.in"
 source "$BR2_EXTERNAL_THINGINO_PATH/package/wifi/Config.in"
 
 menuconfig BR2_THINGINO_SYSTEM_PACKAGES
@@ -25,7 +24,7 @@ menuconfig BR2_THINGINO_SYSTEM_PACKAGES
 	select BR2_PACKAGE_MBEDTLS
 	select BR2_PACKAGE_MBEDTLS_COMPRESSION
 	select BR2_PACKAGE_UBOOT_TOOLS
-    select BR2_PACKAGE_JSONFILTER
+	select BR2_PACKAGE_JSONFILTER
 	select BR2_PACKAGE_WEBUI
 	select BR2_PACKAGE_WPA_SUPPLICANT_DEBUG_SYSLOG if BR2_PACKAGE_WPA_SUPPLICANT
 	help
@@ -72,6 +71,7 @@ menu "Extra Packages"
 	source "$BR2_EXTERNAL_THINGINO_PATH/package/uacme-openipc/Config.in"
 	source "$BR2_EXTERNAL_THINGINO_PATH/package/vtund-openipc/Config.in"
 	source "$BR2_EXTERNAL_THINGINO_PATH/package/zerotier-one/Config.in"
+	source "$BR2_EXTERNAL_THINGINO_PATH/package/thingino-portal/Config.in"
 
 	config BR2_PACKAGE_IFUPDOWN_SCRIPTS
 		bool "ifupdown-scripts"

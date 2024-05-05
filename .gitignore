@@ -6,6 +6,10 @@ tmp/
 toolchain/
 wirebox/
 .board
+.gitconfig
 configs/fragments/local.fragment
 /local.mk
+/.bootstrapped
 /.settings/
+/environment/@local.uenv.txt
+/.prereqs.done
