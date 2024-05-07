@@ -585,6 +585,7 @@ ifeq ($(KERNEL_VERSION_4),y)
 SDK_LIBC_VERSION := 5.4.0
 SDK_LIBC_NAME := uclibc
 SDK_VERSION := 1.1.6
+SENSOR_MODEL := gc2053
 endif
 endif
 
