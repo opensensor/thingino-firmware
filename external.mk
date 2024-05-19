@@ -579,7 +579,7 @@ ifeq ($(BR2_SOC_INGENIC_T31),y)
 ifeq ($(KERNEL_VERSION_4),y)
 SDK_LIBC_VERSION := 4.7.2
 SDK_LIBC_NAME := uclibc
-SDK_VERSION := 1.1.5.2
+SDK_VERSION := 1.0.5
 endif
 endif
 
