@@ -1,6 +1,5 @@
-INGENIC_SDK_SITE_METHOD = git
-INGENIC_SDK_SITE = https://github.com/opensensor/ingenic-sdk
-INGENIC_SDK_VERSION = $(shell git ls-remote $(INGENIC_SDK_SITE) master | head -1 | cut -f1)
+INGENIC_SDK_SITE_METHOD = local
+INGENIC_SDK_SITE = /home/matteius/ingenic-sdk-opensensor
 
 INGENIC_SDK_LICENSE = GPL-3.0
 INGENIC_SDK_LICENSE_FILES = LICENSE
