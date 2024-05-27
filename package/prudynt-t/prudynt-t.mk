@@ -1,10 +1,10 @@
-PRUDYNT_T_SITE_METHOD = git
-PRUDYNT_T_SITE = https://github.com/opensensor/prudynt-t
+PRUDYNT_T_SITE_METHOD = local
+PRUDYNT_T_SITE = /home/matteius/prudynt-t-opensensor
 PRUDYNT_T_DEPENDENCIES = libconfig thingino-live555 thingino-freetype thingino-fonts ingenic-lib ingenic-musl
 PRUDYNT_T_SITE_BRANCH = master
 PRUDYNT_T_VERSION = $(shell git ls-remote $(PRUDYNT_T_SITE) $(PRUDYNT_T_SITE_BRANCH) | head -1 | cut -f1)
 
-PRUDYNT_CFLAGS += -DPLATFORM_T30
+PRUDYNT_CFLAGS += -DPLATFORM_T31
 ifeq ($(KERNEL_VERSION_4),y)
 PRUDYNT_CFLAGS += -DKERNEL_VERSION_4
 endif
