@@ -1,0 +1,6 @@
+config BR2_PACKAGE_WIFI_ATBM6062S_CUSTOM
+	select BR2_LINUX_KERNEL
+	bool "AltoBeam ATBM6062S (Custom Local Build)"
+	help
+	  Custom local build of ATBM6062S WiFi driver for kernel 4.4 compatibility
+

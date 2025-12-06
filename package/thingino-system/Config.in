@@ -5,7 +5,7 @@ config BR2_PACKAGE_THINGINO_SYSTEM
 
 config BR2_PACKAGE_THINGINO_SYSTEM_USB_ROLE
 	default y
-	depends on BR2_PACKAGE_THINGINO_SYSTEM && BR2_PACKAGE_THINGINO_KOPT_DWC2_OTG
+	depends on BR2_PACKAGE_THINGINO_SYSTEM && BR2_PACKAGE_THINGINO_KOPT_DWC2
 	bool "usb-role switcher"
 	help
 	  Enables on the fly USB role switching when using the ingenic DWC2 USB controller.

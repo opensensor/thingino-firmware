@@ -1,0 +1,816 @@
+U-Boot SPL 2013.07 (Mar 07 2023 - 15:38:04)
+Timer init
+CLK stop
+PLL init
+pll_init:366
+pll_cfg.pdiv = 10, pll_cfg.h2div = 5, pll_cfg.h0div = 5, pll_cfg.cdiv = 1, pll_cfg.l2div = 2
+nf=116 nr = 1 od0 = 1 od1 = 2
+cppcr is 07405100
+CPM_CPAPCR 0740510d
+nf=100 nr = 1 od0 = 1 od1 = 2
+cppcr is 06405100
+CPM_CPMPCR 0640510d
+nf=100 nr = 1 od0 = 1 od1 = 2
+cppcr is 06405100
+CPM_CPVPCR 0640510d
+cppcr 0x9a7b5510
+apll_freq 1392000000 
+mpll_freq 1200000000 
+vpll_freq = 1200000000
+ddr sel mpll, cpu sel apll
+ddrfreq 600000000
+cclk  1392000000
+l2clk 696000000
+h0clk 240000000
+h2clk 240000000
+pclk  120000000
+CLK init
+SDRAM init
+sdram init start
+ddr_inno_phy_init ..!
+phy reg = 0x00000007, CL = 0x00000007
+ddr_inno_phy_init ..! 11:  00000004
+ddr_inno_phy_init ..! 22:  00000006
+ddr_inno_phy_init ..! 33:  00000006
+REG_DDR_LMR: 00000210
+REG_DDR_LMR: 00000310
+REG_DDR_LMR: 00000110
+REG_DDR_LMR, MR0: 00f73011
+T31_0x5: 00000007
+T31_0x15: 0000000c
+T31_0x4: 00000000
+T31_0x14: 00000002
+INNO_TRAINING_CTRL 1: 00000000
+INNO_TRAINING_CTRL 2: 000000a1
+T31_cc: 00000003
+INNO_TRAINING_CTRL 3: 000000a0
+T31_118: 0000003c
+T31_158: 0000003c
+T31_190: 0000001f
+T31_194: 0000001d
+jz-04 :  0x00000051 
+jz-08 :  0x000000a0 
+jz-28 :  0x00000024 
+DDR PHY init OK
+INNO_DQ_WIDTH   :00000003
+INNO_PLL_FBDIV  :00000014
+INNO_PLL_PDIV   :00000005
+INNO_MEM_CFG    :00000051
+INNO_PLL_CTRL   :00000018
+INNO_CHANNEL_EN :0000000d
+INNO_CWL        :00000006
+INNO_CL         :00000007
+DDR Controller init
+DDRC_STATUS         0x80000001
+DDRC_CFG            0x0aa88a42
+DDRC_CTRL           0x0000011c
+DDRC_LMR            0x00400008
+DDRC_DLP            0x00000000
+DDRC_TIMING1        0x050f0a06
+DDRC_TIMING2        0x021c0a07
+DDRC_TIMING3        0x200a0722
+DDRC_TIMING4        0x26240031
+DDRC_TIMING5        0xff060405
+DDRC_TIMING6        0x321c0505
+DDRC_REFCNT         0x00910503
+DDRC_MMAP0          0x000020f8
+DDRC_MMAP1          0x00002800
+DDRC_REMAP1         0x030e0d0c
+DDRC_REMAP2         0x07060504
+DDRC_REMAP3         0x0b0a0908
+DDRC_REMAP4         0x0f020100
+DDRC_REMAP5         0x13121110
+DDRC_AUTOSR_EN      0x00000000
+sdram init finished
+SDRAM init ok
+board_init_r
+image entry point: 0x80100000
+
+
+U-Boot 2013.07 (Mar 07 2023 - 15:38:04)
+
+Board: ISVP (Ingenic XBurst T31 SoC)
+DRAM:  128 MiB
+DTB: 0x8013de38
+Top of RAM usable for U-Boot at: 84000000
+Reserving 440k for U-Boot at: 83f90000
+Reserving 32800k for malloc() at: 81f88000
+Reserving 32 Bytes for Board Info at: 81f87fe0
+Reserving 124 Bytes for Global Data at: 81f87f64
+Reserving 128k for boot params() at: 81f67f64
+Stack Pointer at: 81f67f48
+Now running in RAM - U-Boot at: 83f90000
+MMC:   msc: 0
+Using default environment
+
+In:    serial
+Out:   serial
+Err:   serial
+gpio_request lable = wifi_enable_gpio gpio = 57
+gpio_request lable = yellow_gpio gpio = 38
+gpio_request lable = MACHINE_SW gpio = 59
+gpio_request lable = blue_gpio gpio = 39
+gpio_request lable = night_gpio gpio = 60
+gpio_request lable = SPK_able_gpio gpio = 58
+gpio_request lable = TF_en_gpio gpio = 47
+gpio_request lable = TF_cd_gpio gpio = 48
+gpio_request lable = SD_able_gpio gpio = 54
+gpio_request lable = wifi_enable_gpio gpio = 57
+gpio_request lable = sdupgrade gpio = 6
+the manufacturer c8
+SF: Detected GD25Q128
+
+the manufacturer c8
+SF: Detected GD25Q128
+
+### JFFS2 loading 'upGradeFlag' to 0x82000000
+Scanning JFFS2 FS: . done.
+find_inode failed for name=upGradeFlag
+load: Failed to find inode
+### JFFS2 LOAD ERROR<0> for upGradeFlag!
+Failed to read upGradeFlag file
+gpio_request lable = TF_cd_gpio gpio = 48
+the manufacturer c8
+SF: Detected GD25Q128
+
+--->probe spend 4 ms
+SF: 2162688 bytes @ 0x50000 Read: OK
+--->read spend 696 ms
+## Loading kernel from FIT Image at 80600000 ...
+   Using 'conf' configuration
+   Verifying Hash Integrity ... sha256,rsa2048:kernel-dev+ sha256,rsa2048:kernel-dev+ OK
+   Trying 'kernel' kernel subimage
+     Description:  t31 kernel
+     Type:         Kernel Image
+     Compression:  uncompressed
+     Data Start:   0x80600204
+     Data Size:    1774039 Bytes = 1.7 MiB
+     Architecture: MIPS
+     OS:           Linux
+     Load Address: 0x80f00000
+     Entry Point:  0x80f00000
+     Hash algo:    sha256
+     Hash value:   ba431078494e9061de015f738ea9f57d732a11a2b6693a52599013116e14e8be
+   Verifying Hash Integrity ... sha256�F 16
+@ x H����m9�����
+
+
+U-Boot SPL 2013.07 (Feb 21 2024 - 11:58:46)
+Board info: T41NQ
+
+apll_freq = 1104000000 
+mpll_freq = 1400000000 
+vpll_freq = 1188000000 
+sdram init start
+DDR clk rate 700000000
+DDR_PAR of eFuse: 00000000 00000000
+DDRP_INNOPHY_PLL_CTRL: 00000028
+DDRP_INNOPHY_PLL_CTRL: 00000020
+T41 InnoPhy skew Settings...
+mem data:
+81000000:   00000000  ffffffff  00000000  ffffffff
+81000010:   00000000  ffffffff  00000000  ffffffff
+81000020:   00000000  ffffffff  00000000  ffffffff
+81000030:   00000000  ffffffff  00000000  ffffffff
+image entry point: 0x80100000
+Board: ISVP (Ingenic XBurst2 T41 SoC)
+DRAM size is 128 MiB
+DTB: 0x8013caf4
+Warning!!!!! This version is not CI release version!!!!!
+Warning!!!!! This version is not CI release version!!!!!
+Warning!!!!! This version is not CI release version!!!!!
+Warning!!!!! This version is not CI release version!!!!!
+Warning!!!!! This version is not CI release version!!!!!
+Top of RAM usable for U-Boot at: 88000000
+Reserving 434k for U-Boot at: 87f90000
+Reserving 32772k for malloc() at: 85f8f000
+Reserving 32 Bytes for Board Info at: 85f8efe0
+Reserving 124 Bytes for Global Data at: 85f8ef64
+Reserving 128k for boot params() at: 85f6ef64
+Stack Pointer at: 85f6ef48
+Now running in RAM - U-Boot at: 87f90000
+MMC:   MSC: 0
+Using default environment
+
+Data transfer:    serial
+gpio_request lable = red_gpio gpio = 39
+Hit any key to stop autoboot:  0 
+SF: Detected XT25F128B, flash size: 16MB, manufacturer id: 0b
+
+gpio_request lable = TF_cd_gpio gpio = 58
+SF: Detected XT25F128B, flash size: 16MB, manufacturer id: 0b
+
+### JFFS2 loading 'upGradeFlag' to 0x85f6e128
+Scanning JFFS2 FS: . done.
+find_inode failed for name=upGradeFlag
+load: Failed to find inode
+### JFFS2 LOAD ERROR<0> for upGradeFlag!
+Removing MTD device #0 (nor0) with use count 7
+SF: Detected XT25F128B, flash size: 16MB, manufacturer id: 0b
+
+--->probe spend 6 ms
+SF: 4653056 bytes @ 0x30000 Read: OK
+--->read spend 1492 ms
+## Loading kernel from FIT Image at 80600000 ...
+   Using 'conf' configuration
+   Verifying Hash Integrity ... sha256,rsa2048:kernel-dev+ OK
+   Trying 'kernel' kernel subimage
+     Description:  ingenict41 kernel
+     Type:         Kernel Image
+     Compression:  uncompressed
+     Data Start:   0x80604298
+     Data Size:    1557904 Bytes = 1.5 MiB
+     Architecture: MIPS
+     OS:           Linux
+     Load Address: 0x80f00000
+     Entry Point:  0x80f00000
+     Hash algo:    sha256
+     Hash value:   04b762435ff679f32ddec7eea9557239b675db23da300dbc426d3d79387c7858
+   Verifying Hash Integrity ... sha256+ OK
+## Loading ramdisk from FIT Image at 80600000 ...
+   Using 'conf' configuration
+   Trying 'ramdisk' ramdisk subimage
+     Description:  ingenict41 ramdisk
+     Type:         RAMDisk Image
+     Compression:  uncompressed
+     Data Start:   0x80780934
+     Data Size:    2969600 Bytes = 2.8 MiB
+     Architecture: MIPS
+     OS:           Linux
+     Load Address: 0x00000000
+     Entry Point:  0x38000000
+     Hash algo:    sha256
+     Hash value:   bb0b9d3a1526d34ec51464e1578f00e4107ecf503b7339c87697e4f91a5c70d4
+   Verifying Hash Integrity ... sha256+ OK
+## Loading fdt from FIT Image at 80600000 ...
+   Using 'conf' configuration
+   Trying 'fdt' fdt subimage
+     Description:  ingenict41 dtb
+     Type:         Flat Device Tree
+     Compression:  uncompressed
+     Data Start:   0x806000c4
+     Data Size:    16619 Bytes = 16.2 KiB
+     Architecture: MIPS
+     Hash algo:    sha256
+     Hash value:   f4235b6ca48ede7f3d7ad04077b7ccdf60cd1ac704d3d7085a4d504ba8c31a07
+   Verifying Hash Integrity ... sha256+ OK
+   Loading fdt from 0x806000c4 to 0x83000000
+   Booting using the fdt blob at 0x83000000
+   Loading Kernel Image ... OK
+   Loading Ramdisk to 85c91000, end 85f66000 ... OK
+   Loading Device Tree to 85c89000, end 85c900ea ... OK
+
+Starting kernel ...
+
+[    0.000000] Linux version 4.4.94 (zhansgasa@zhangsasa) (gcc version 7.2.0 (Ingenic Linux-Release5.1.7-Default_xburst2_glibc2.29 jump and sibling calls 2023.06-27 03:08:03) ) #20 SMP PREEMPT Thu Dec 21 13:56:07 CST 2023
+[    0.000000] CPU0 RESET ERROR PC:3F7F7EFE
+[    0.000000] bootconsole [early0] enabled
+[    0.000000] CPU0 revision is: 00132100 (Ingenic XBurst@II)
+[    0.000000] FPU revision is: 00f32100
+[    0.000000] MIPS: machine is ingenic,marmot
+[    0.000000] Warning!!!!! This version is not CI release version!!!!!
+[    0.000000] Warning!!!!! This version is not CI release version!!!!!
+[    0.000000] Warning!!!!! This version is not CI release version!!!!!
+[    0.000000] Warning!!!!! This version is not CI release version!!!!!
+[    0.000000] Warning!!!!! This version is not CI release version!!!!!
+[    0.000000] Determined physical RAM map:
+[    0.000000]  memory: 00447000 @ 00010000 (usable)
+[    0.000000]  memory: 00039000 @ 00457000 (usable after init)
+[    0.000000] User-defined physical RAM map:
+[    0.000000]  memory: 06300000 @ 00000000 (usable)
+[    0.000000] Initial ramdisk at: 0x85c91000 (2969600 bytes)
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000000000000-0x00000000062fffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000000000-0x00000000062fffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x00000000062fffff]
+[    0.000000] [SMP] Slave CPU(s) 1 available.
+[    0.000000] Primary instruction cache 32kB, VIPT, 8-way, linesize 32 bytes.
+[    0.000000] Primary data cache 32kB, 8-way, VIPT, no aliases, linesize 32 bytes
+[    0.000000] Unified secondary cache 128kB 8-way, linesize 64 bytes.
+[    0.000000] PERCPU: Embedded 9 pages/cpu @81117000 s8176 r8192 d20496 u36864
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping off.  Total pages: 25146
+[    0.000000] Kernel command line: console=ttyS1,115200n8 mem=99M@0x0 rmem=21M@0x6300000 nmem=8M@0x7800000 init=/linuxrc ro root=/dev/ram0 rootfstype=squashfs mtdparts=sfc0_nor:192K(uboot),4544K(boot),5632K(system),5632K(back),320K(cfg),64K(provisioning) lpj=11968512 ramdisk_size=2900
+[    0.000000] PID hash table entries: 512 (order: -1, 2048 bytes)
+[    0.000000] Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
+[    0.000000] Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
+[    0.000000] Memory: 92412K/101376K available (3290K kernel code, 167K rwdata, 916K rodata, 228K init, 98K bss, 8964K reserved, 0K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+[    0.000000] Preemptible hierarchical RCU implementation.
+[    0.000000] parse cpu-intc-iomap, intc define in dt is too large!
+[    0.000000] core irq setup finished and percpu irq inited! NR_IRQS = 419
+[    0.000000] t41 Clock Power Management Unit init sucess!
+[    0.000000] parse cpu-ost-iomap, ost number define in dt is too large!
+[    0.000000] percpu cpu_num:0 timerevent init
+[    0.000000] clockevents_config_and_register success.
+[    0.000000] clocksource: jz_clocksource: mask: 0x7fffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+[    0.000000] sched_clock: 64 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+[    0.000138] Calibrating delay loop (skipped) preset value.. 2393.70 BogoMIPS (lpj=11968512)
+[    0.008548] pid_max: default: 32768 minimum: 301
+[    0.013315] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.019966] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.027682] [SMP] Prepare 2 cores., cpu: 0
+[    0.105965] [SMP] Booting CPU1 ...
+[    0.109338] CPU1 RESET ERROR PC:FFFEFFFE
+[    0.109354] Primary instruction cache 32kB, VIPT, 8-way, linesize 32 bytes.
+[    0.109359] Primary data cache 32kB, 8-way, VIPT, no aliases, linesize 32 bytes
+[    0.109364] Unified secondary cache 128kB 8-way, linesize 64 bytes.
+[    0.109425] percpu cpu_num:1 timerevent init
+[    0.109441] clockevents_config_and_register success.
+[    0.109447] CPU1 revision is: 00132100 (Ingenic XBurst@II)
+[    0.109450] FPU revision is: 00f32100
+[    0.109653] Brought up 2 CPUs
+[    0.156460] devtmpfs: initialized
+[    0.161425] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.171378] futex hash table entries: 512 (order: 2, 16384 bytes)
+[    0.177598] pinctrl core: initialized pinctrl subsystem
+[    0.183158] NET: Registered protocol family 16
+[    0.189146] ingenic pinctrl 10010000.pinctrl: 4 gpio chip add success, pins 128
+[    0.197361] ingenic pinctrl 10010000.pinctrl: ingenic pinctrl probe success
+[    0.206042] dmmu_init 807 PTRS_PER_PTE = 1024
+[    0.218263] ingenic-dma 13420000.dma: INGENIC SoC DMA initialized
+[    0.224611] usbcore: registered new interface driver usbfs
+[    0.230175] usbcore: registered new interface driver hub
+[    0.235576] usbcore: registered new device driver usb
+[    0.240795] inno phy probe success
+[    0.245516] clocksource: Switched to clocksource jz_clocksource
+[    0.252874] NET: Registered protocol family 2
+[    0.257787] TCP established hash table entries: 1024 (order: 0, 4096 bytes)
+[    0.264790] TCP bind hash table entries: 1024 (order: 1, 8192 bytes)
+[    0.271287] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.277736] UDP hash table entries: 256 (order: 1, 8192 bytes)
+[    0.283597] UDP-Lite hash table entries: 256 (order: 1, 8192 bytes)
+[    0.290129] NET: Registered protocol family 1
+[    0.294670] Trying to unpack rootfs image as initramfs...
+[    0.300369] rootfs image is not initramfs (junk in compressed archive); looks like an initrd
+[    0.315215] Freeing initrd memory: 2900K
+[    0.320477] squashfs: version 4.0 (2021/14/49) Phillip Lougher 
+[    0.326563] jffs2: version 2.2. © 2001-2006 Red Hat, Inc.
+[    0.333120] io scheduler noop registered
+[    0.337132] io scheduler cfq registered (default)
+[    0.342002] ingenic,t41-pwm 13460000.pwm: PWM clk100k:480
+[    0.347474] ingenic,t41-pwm 13460000.pwm: period_ns:max=1365312,min=42
+[    0.355131] Ingenic drawbox probe sucess!
+[    0.359416] vpu_register
+[    0.361901] helix probe success
+[    0.365372] dma_malloc of jzaip_t is ok! size = 1024 Bytes
+[    0.371230] dma_malloc of jzaip_f is ok! size = 106600 Bytes
+[    0.377291] dma_malloc of jzaip_p is ok! size = 221184 Bytes
+[    0.383193] @@@ AIP driver init sucess (Version: H20230331a) @@@
+[    0.389451] 10031000.serial: ttyS1 at MMIO 0x10031000 (irq = 58, base_baud = 7291666) is a uart1
+[    0.398386] console [ttyS1] enabled
+[    0.398386] console [ttyS1] enabled
+[    0.405485] bootconsole [early0] disabled
+[    0.405485] bootconsole [early0] disabled
+[    0.414154] 10032000.serial: ttyS2 at MMIO 0x10032000 (irq = 57, base_baud = 7291666) is a uart2
+[    0.424589] brd: module loaded
+[    0.429720] ingenic-tcu 10002000.tcu: Ingenic TCU driver register completed ret = 0
+[    0.438379] ingenic-sfc 13440000.sfc0: Found Supported nor device, BE = 32K, id = b4018, name = XT25F128B
+[    0.448505] ingenic-sfc 13440000.sfc0: nor flash now use standard mode!
+[    0.455454] 6 cmdlinepart partitions found on MTD device sfc0_nor
+[    0.461871] Creating 6 MTD partitions on "sfc0_nor":
+[    0.467092] 0x000000000000-0x000000030000 : "uboot"
+[    0.473294] 0x000000030000-0x0000004a0000 : "boot"
+[    0.479379] 0x0000004a0000-0x000000a20000 : "system"
+[    0.485631] 0x000000a20000-0x000000fa0000 : "back"
+[    0.491684] 0x000000fa0000-0x000000ff0000 : "cfg"
+[    0.497700] 0x000000ff0000-0x000001000000 : "provisioning"
+[    0.504470] ingenic-sfc 13440000.sfc0: SPI NOR MTD LOAD OK
+[    0.510568] OTG CLK 1f9e6fc4
+[    0.514857] CPCCR CLK 1580
+[    0.717455] dwc2 13500000.otg: DWC OTG Controller
+[    0.722417] dwc2 13500000.otg: new USB bus registered, assigned bus number 1
+[    0.729888] dwc2 13500000.otg: irq 29, io mem 0x00000000
+[    0.736274] hub 1-0:1.0: USB hub found
+[    0.740245] hub 1-0:1.0: 1 port detected
+[    0.744963] ingenic-i2c 10050000.i2c: register i2c0 success.
+[    0.751825] device-mapper: ioctl: 4.34.0-ioctl (2015-10-28) initialised: dm-devel@redhat.com
+[    0.760963] sdhci: Secure Digital Host Controller Interface driver
+[    0.767499] sdhci: Copyright(c) Pierre Ossman
+[    0.772441] ingenic,sdhci 13060000.msc: allocated mmc-pwrseq
+[    0.815580] mmc0: SDHCI controller on ingenic-sdhci [13060000.msc] using ADMA
+[    0.827698] mmc0: card removed
+[    0.831250] ingenic,sdhci 13070000.msc: allocated mmc-pwrseq
+[    1.065550] mmc1: SDHCI controller on ingenic-sdhci [13070000.msc] using ADMA
+[    1.077858] NET: Registered protocol family 17
+[    1.083708] soc_vpu probe success,version:1.0.0-03203fd46d
+^@[    1.094395] RAMDISK: squashfs filesystem found at block 0
+[    1.095672] mmc1: new high speed SDIO card at address 0001
+[    1.106037] RAMDISK: Loading 2899KiB [1 disk] into ram disk... done.
+[    1.184809] VFS: Mounted root (squashfs filesystem) readonly on device 1:0.
+[    1.194461] devtmpfs: mounted
+[    1.197836] Freeing unused kernel memory: 228K
+Starting syslogd: OK
+Starting klogd: OK
+Running sysctl: OK
+fs_mgr start...
+[    1.626464] random: nonblocking pool is initialized
+Verity success
+Mount root success [mount -t squashfs -o ro /dev/dm-0 /system]
+[    1.792796] @@@@ avpu driver ok(version H20220825a) @@@@@
+[    1.900542] @@@@ tx-isp-probe ok (version H20231009a) compiler date: Feb  2 2024 @@@@
+[    1.922915] @@@@ soc nna probe sucess (Board: T41, Version: H20230310) @@@
+[    1.930261] soc_nna_init success
+[    1.935225] sensor_gc3003a_t41: unknown parameter 'shvflip' ignored
+[    2.975541] @@@@@ inner codec power up@@@@@@
+[    3.365580] @@@@ audio driver ok(version H20230311a) @@@@@
+[    3.390368] exFAT: Version 1.2.9
+[    3.406296] usbcore: registered new interface driver ch37x
+[    3.413948] usbcore: registered new interface driver usb_ch341
+[    3.420130] ch341: USB serial driver for ch340, ch341, etc.
+[    3.426069] ch341: V1.6 On 2020.12.23
+[    3.431547] loading jz-dtrng driver
+[    3.435392] jz_dtrng_probe 281
+[    3.438660] jz_dtrng_probe, dtrng iomem is :0xb0072000
+[    3.444087] jz_dtrng_probe, dtrng irq is : 42
+[    3.448985] jz_dtrng_probe: probe() done
+[    3.583482] [atbm_log]:SVN_VER=20816,DPLL_CLOCK=24,BUILD_TIME=[===== =====]
+[    3.590863] [atbm_log]:----drvier RATEPOLCIY=OLD
+[    3.595929] [atbm_log]:Probe called
+[    3.599732] [atbm_log]:atbm_sdio_probe:v12
+[    3.604047] [atbm_log]:Allocated hw_priv @ 827aae60
+[    3.619638] [atbm_log]:[BH] register.
+[    3.623600] [atbm_log]:atbmwifi INIT_WORK enable
+[    3.628807] [atbm_log]:atbmwifi INIT_WORK enable
+[    3.633776] [atbm_log]:atbm_before_load_firmware++
+[    3.633788] [atbm_log]:atbm_sdio_rx_thread
+[    3.644173] [atbm_log]:atbm_HwGetChipType, chipver=0x49, g_wifi_chip_type[10]
+[    3.652231] [atbm_log]:atbm_before_load_firmware:0xab0016c = [34800000]
+[    3.655560] [atbm_log]:rx timeout
+[    3.663226] [atbm_log]:atbm_before_load_firmware:0xab0016c = [34800000]
+[    3.670863] [atbm_log]:atbm_before_load_firmware:do not set config to smu
+[    3.680794] [atbm_log]:atbm_before_load_firmware:read [0x16100074]=[0],ret(0)
+[    3.688808] [atbm_log]:atbm_before_load_firmware:write [0x16100074]=[1],ret(0)
+[    3.698581] [atbm_log]:atbm_start_load_firmware++
+[    3.703510] [atbm_log]:used firmware.h=
+[    3.707556] [atbm_log]:START DOWNLOAD ICCM=========
+[    3.712845] [atbm_log]:atbm_load_firmware_generic: addr 10000: len 22000
+[    3.773991] [atbm_log]:START DOWNLOAD DCCM=========
+[    3.779171] [atbm_log]:atbm_load_firmware_generic: addr 800000: len 9000
+[    3.800847] [atbm_log]:atbm_after_load_firmware++
+[    3.831983] [atbm_log]:firmwareCap f5ad
+[    3.836064] [atbm_log]:firmwareCap2 51a4
+[    3.840177] [atbm_log]:wsm_caps.firmwareCap 51a4f5ad
+[    3.845208] [atbm_log]:apollo wifi WSM init done.
+[    3.845208]    Input buffers: 42 x 1728 bytes
+[    3.845208]    Hardware: 7.1280
+[    3.845208]    WSM firmware [=MODEM=RF=Ares_AX  2GHZ Jun  6 2022 16:59:01NOTXConfrim], ver: 14449, build: 2835, api: 1060, cap: 0x51A4F5AD Config[30008]  expection 900b80c, ep0 cmd addr 901d3f8 NumOfStations[8] NumOfInterfaces[3]
+[    3.879506] [atbm_log]:EFUSE(8)				[0]
+[    3.880853] [atbm_log]:set_block_size=256
+[    3.880858] [atbm_log]:mdelay wait wsm_startup_done  !!
+[    3.893150] [atbm_log]:EFUSE(I)					[1]
+[    3.897209] [atbm_log]:EFUSE(B)			[0]
+[    3.901060] [atbm_log]:CAPABILITIES_ATBM_PRIVATE_IE      [0]
+[    3.907032] [atbm_log]:CAPABILITIES_NVR_IPC              [1]
+[    3.912974] [atbm_log]:CAPABILITIES_NO_CONFIRM           [1]
+[    3.918947] [atbm_log]:CAPABILITIES_SDIO_PATCH           [0]
+[    3.924887] [atbm_log]:CAPABILITIES_NO_BACKOFF           [1]
+[    3.930859] [atbm_log]:CAPABILITIES_CFO                  [0]
+[    3.936839] [atbm_log]:CAPABILITIES_AGC                  [1]
+[    3.942773] [atbm_log]:CAPABILITIES_TXCAL                [1]
+[    3.948730] [atbm_log]:CAPABILITIES_MONITOR              [0]
+[    3.954677] [atbm_log]:CAPABILITIES_CUSTOM               [1]
+[    3.960656] [atbm_log]:CAPABILITIES_SMARTCONFIG          [0]
+[    3.966623] [atbm_log]:CAPABILITIES_ETF                  [1]
+[    3.972555] [atbm_log]:CAPABILITIES_LMAC_RATECTL         [1]
+[    3.978516] [atbm_log]:CAPABILITIES_LMAC_TPC             [1]
+[    3.984458] [atbm_log]:CAPABILITIES_LMAC_TEMPC           [1]
+[    3.990427] [atbm_log]:CAPABILITIES_CTS_BUG              [0]
+[    3.996423] [atbm_log]:CAPABILITIES_USB_RECOVERY_BUG     [0]
+[    4.002357] [atbm_log]:CAPABILITIES_USE_IPC              [0]
+[    4.008318] [atbm_log]:CAPABILITIES_OUTER_PA             [0]
+[    4.014266] [atbm_log]:CAPABILITIES_POWER_CONSUMPTION    [1]
+[    4.020243] [atbm_log]:CAPABILITIES_RSSI_DECIDE_TXPOWER  [0]
+[    4.026219] [atbm_log]:CAPABILITIES_RTS_LONG_DURATION    [1]
+[    4.032150] [atbm_log]:CAPABILITIES_TX_CFO_PPM_CORRECTION[1]
+[    4.038116] [atbm_log]:CAPABILITIES_SHARE_CRYSTAL       [0]
+[    4.043972] [atbm_log]:CAPABILITIES_HW_CHECKSUM          [0]
+[    4.049941] [atbm_log]:CAPABILITIES_SINGLE_CHANNEL_MULRX [0]
+[    4.055916] [atbm_log]:CAPABILITIES_CFO_DCXO_CORRECTION  [1]
+[    4.061850] [atbm_log]:EX_CAPABILITIES_TWO_CHIP_ONE_SOC	[0]
+[    4.067530] [atbm_log]:EX_CAPABILITIES_MANUAL_SET_AC 	[0][atbm_log]:EX_CAPABILITIES_LMAC_BW_CONTROL	[1]
+[    4.077440] [atbm_log]:EX_CAPABILITIES_SUPPORT_TWO_ANTENNA	[0][atbm_log]:EX_CAPABILITIES_ENABLE_STA_REMAIN_ON_CHANNEL	[1]
+[    4.088978] [atbm_log]:EX_CAPABILITIES_ENABLE_PS 	   [1][atbm_log]:EX_CAPABILITIES_TX_REQUEST_FIFO_LINK 	   [0]
+[    4.099614] [atbm_log]:EX_CAPABILITIES_CHIP_TYPE		6032IS
+[    4.105383] [atbm_log]:CONFIG_PRODUCT_TEST_USE_FEATURE_ID [1]
+[    4.111440] [atbm_log]:CONFIG_PRODUCT_TEST_USE_GOLDEN_LED [1]
+[    4.118206] [atbm_log]:wsm_generic_confirm:status(2)
+[    4.123438] [atbm_log]:<WARNING> wsm_write_mib fail !!! mibId=4132
+[    4.130859] [atbm_log]:apollo wifi : can't open /data/.mac.info
+[    4.137646] [atbm_log]:efuse data is [0x1,0x29,0x3,0x4,0x4,0xa,0x0,0x0,0xc0:0x8a:0x60:0x14:0xe2:0x85]
+[    4.147725] [atbm_log]:param:delta_gain1:-1 delta_gain2:-1 delta_gain3:-1 dcxo:-1
+b_delta_gain1:10 b_delta_gain2:12 b_delta_gain3:15
+gn_delta_gain1:10 gn_delta_gain2:8 gn_delta_gain3:12
+[    4.165235] [atbm_log]:cmd: set_txpwr_and_dcxo,-1,-1,-1,-1,10,12,15,10,8,12 
+[    4.173413] [atbm_log]:0,b_1M_2M=0
+[    4.177606] [atbm_log]:1,b_5_5M_11M=0
+[    4.181448] [atbm_log]:2,g_6M_n_6_5M=0
+[    4.185372] [atbm_log]:3,g_9M=0
+[    4.189095] [atbm_log]:4,g_12M_n_13M=0
+[    4.193028] [atbm_log]:5,g_18M_n_19_5M=0
+[    4.197468] [atbm_log]:6,g_24M_n_26M=0
+[    4.201400] [atbm_log]:7,g_36M_n_39M=0
+[    4.205325] [atbm_log]:8,g_48M_n_52M=0
+[    4.209705] [atbm_log]:9,g_54M_n_58_5M=0
+[    4.213820] [atbm_log]:10,n_65M=2
+[    4.218219] [atbm_log]:get chip id [b4][1][1] 
+[    4.222962] [atbm_log]:current chiptype 6032is 
+[    4.228128] [atbm_log]:enable sg
+[    4.232182] [atbm_log]:enable sg
+[    4.236567] [atbm_log]:is registered as 'ALTOBEAM'
+[    4.241593] [atbm_log]:[atbm_wtd]:set wtd_probe = 1
+[    4.464677] no manual card detect
+[    4.675684] [atbm_log]:mmc1 has been attached
+[    4.694806] @@@@ multi-process system init sucess (Board: T41, Version: H20230310) @@@
+[    4.703227] nmem_size = 8M
+[    4.706470] nmem_start = 0x7800000
+net.core.wmem_max = 26214400
+net.core.wmem_default = 26214400
+mount: mounting /dev/mmcblk0p1 on /media/ failed: No such file or directory
+#####################
+###    Check TB   ###
+#####################
+umount: can't unmount /dev/mmcblk0p1: No such file or directory
+Updating device time to:
+Tue Aug 12 05:25:31 UTC 2025
+[VER]
+appver=4.53.9.4352
+gitsha=82d16ca9f7-dirty
+#######################
+#   IS USER STATUS   #
+#######################
+kernel.core_pattern = |/system/bin/ucoredmp_collector.sh --pid %p --signal %s --name %e --time %t --output-dir /media/mmc/cores
+kernel.core_pipe_limit = 1
+net.unix.max_dgram_qlen = 128
+
+Welcome
+t41 login: [    8.812749] dtrng_open:dtrng open successsful!
+[    8.817560] data from user is 0
+[    8.820873] dtrng_ope_irq_handler   random:	0x6b5cd210
+[    8.826299] data to  user is 1801245200
+[    9.019875] set sensor mclk(0) gpio
+[    9.086460] -----gc3003a_detect: 489 ret = 0, v = 0x10
+[    9.091846] gc3003a chip found @ 0x37 (i2c0)
+ sensor drv version H20221117a Create framechan0 OK! 
+[    9.101933]  Create framechan1 OK! 
+[    9.106091]  Create framechan2 OK! 
+[    9.164242] Ivdc init! direct_mode is 1
+[   11.499958] soc_nna_open: open sucess
+[   11.505128] NMEM_INIT size: 0x100000
+[   11.509565] remain size = 0x800000, alloc_size = 0x100000
+[   12.139790] [atbm_log]:[p2p0] change mac[82:48:2c:4e:6b:38]
+[   14.762131] [atbm_log]:[p2p0] change to [3]
+[   14.766892] [atbm_log]:add iftype(6),if_cnt(2),flags(83a29c14)
+[   14.773997] [atbm_log]:enable sg
+[   14.896945] [atbm_log]:change ds_params channel 6 
+[   14.929935] [atbm_log]:[TX]:[1]:deatuhen[ff:ff:ff:ff:ff:ff]
+[   15.255037] [atbm_log]:wlan0:free authen bss ++
+[   15.305759] [atbm_log]:wlan0:free authen bss ++
+[   16.096725] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(1),scaned(1)
+[   16.104915] [atbm_log]:atbm_hw_scan:if_id(0)
+[   16.121830] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   16.128115] [atbm_log]:scan start band(0),(1)
+[   16.265213] [atbm_log]:hw_priv->scan.status 0
+[   16.270776] [atbm_log]:atbm_scan_work:end(0)
+[   16.355612] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(2),scaned(2)
+[   16.372001] [atbm_log]:atbm_hw_scan:if_id(0)
+[   16.377148] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   16.390304] [atbm_log]:__ieee80211_scan_completed:1512
+[   16.396347] [atbm_log]:scan start band(0),(1)
+[   16.469877] [atbm_log]:hw_priv->scan.status 0
+[   16.475333] [atbm_log]:atbm_scan_work:end(0)
+[   16.555661] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(3),scaned(3)
+[   16.572664] [atbm_log]:atbm_hw_scan:if_id(0)
+[   16.577712] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   16.591489] [atbm_log]:__ieee80211_scan_completed:1512
+[   16.597510] [atbm_log]:scan start band(0),(1)
+[   16.674672] [atbm_log]:hw_priv->scan.status 0
+[   16.680055] [atbm_log]:atbm_scan_work:end(0)
+[   16.766025] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(4),scaned(4)
+[   16.774466] [atbm_log]:atbm_hw_scan:if_id(0)
+[   16.780422] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   16.786940] [atbm_log]:__ieee80211_scan_completed:1512
+[   16.793098] [atbm_log]:scan start band(0),(1)
+[   16.879467] [atbm_log]:hw_priv->scan.status 0
+[   16.885671] [atbm_log]:atbm_scan_work:end(0)
+[   16.965573] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(5),scaned(5)
+[   16.974949] [atbm_log]:atbm_hw_scan:if_id(0)
+[   16.988729] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   16.994298] [atbm_log]:__ieee80211_scan_completed:1512
+[   17.000355] [atbm_log]:scan start band(0),(1)
+[   17.084323] [atbm_log]:hw_priv->scan.status 0
+[   17.089776] [atbm_log]:atbm_scan_work:end(0)
+[   17.166291] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(6),scaned(6)
+[   17.174480] [atbm_log]:atbm_hw_scan:if_id(0)
+[   17.180398] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   17.194814] [atbm_log]:__ieee80211_scan_completed:1512
+[   17.200702] [atbm_log]:scan start band(0),(1)
+[   17.339864] [atbm_log]:hw_priv->scan.status 0
+[   17.346798] [atbm_log]:atbm_scan_work:end(0)
+[   17.425670] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(7),scaned(7)
+[   17.433903] [atbm_log]:atbm_hw_scan:if_id(0)
+[   17.440676] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   17.446532] [atbm_log]:__ieee80211_scan_completed:1512
+[   17.452418] [atbm_log]:scan start band(0),(1)
+[   17.596356] [atbm_log]:hw_priv->scan.status 0
+[   17.601764] [atbm_log]:atbm_scan_work:end(0)
+[   17.685645] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(8),scaned(8)
+[   17.693904] [atbm_log]:atbm_hw_scan:if_id(0)
+[   17.699387] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   17.713750] [atbm_log]:__ieee80211_scan_completed:1512
+[   17.722980] [atbm_log]:scan start band(0),(1)
+[   17.801166] [atbm_log]:hw_priv->scan.status 0
+[   17.806542] [atbm_log]:atbm_scan_work:end(0)
+[   17.885617] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(9),scaned(9)
+[   17.893754] [atbm_log]:atbm_hw_scan:if_id(0)
+[   17.906386] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   17.921660] [atbm_log]:__ieee80211_scan_completed:1512
+[   17.927478] [atbm_log]:scan start band(0),(1)
+[   18.005938] [atbm_log]:hw_priv->scan.status 0
+[   18.011273] [atbm_log]:atbm_scan_work:end(0)
+[   18.095601] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(10),scaned(10)
+[   18.103935] [atbm_log]:atbm_hw_scan:if_id(0)
+[   18.114363] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   18.126579] [atbm_log]:__ieee80211_scan_completed:1512
+[   18.132460] [atbm_log]:scan start band(0),(1)
+[   18.210746] [atbm_log]:hw_priv->scan.status 0
+[   18.216365] [atbm_log]:atbm_scan_work:end(0)
+[   18.305606] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(11),scaned(11)
+[   18.314089] [atbm_log]:atbm_hw_scan:if_id(0)
+[   18.323931] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   18.329594] [atbm_log]:__ieee80211_scan_completed:1512
+[   18.335647] [atbm_log]:scan start band(0),(1)
+[   18.415641] [atbm_log]:hw_priv->scan.status 0
+[   18.421641] [atbm_log]:atbm_scan_work:end(0)
+[   18.505854] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(12),scaned(12)
+[   18.514253] [atbm_log]:atbm_hw_scan:if_id(0)
+[   18.527123] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   18.532687] [atbm_log]:__ieee80211_scan_completed:1512
+[   18.540055] [atbm_log]:scan start band(0),(1)
+[   18.620469] [atbm_log]:hw_priv->scan.status 0
+[   18.626687] [atbm_log]:atbm_scan_work:end(0)
+[   18.707056] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(13),scaned(13)
+[   18.723528] [atbm_log]:atbm_hw_scan:if_id(0)
+[   18.729088] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   18.734593] [atbm_log]:__ieee80211_scan_completed:1512
+[   18.740928] [atbm_log]:scan start band(0),(1)
+[   18.825210] [atbm_log]:hw_priv->scan.status 0
+[   18.831029] [atbm_log]:atbm_scan_work:end(0)
+[   18.915641] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(14),scaned(14)
+[   18.928061] [atbm_log]:atbm_hw_scan:if_id(0)
+[   18.933883] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   18.941921] [atbm_log]:__ieee80211_scan_completed:1512
+[   18.947776] [atbm_log]:scan start band(0),(1)
+[   19.030043] [atbm_log]:hw_priv->scan.status 0
+[   19.035503] [atbm_log]:atbm_scan_work:end(0)
+[   19.308180] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(1),scaned(1)
+[   19.327625] [atbm_log]:atbm_hw_scan:if_id(0)
+[   19.332754] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   19.340765] [atbm_log]:scan start band(0),(1)
+[   19.439687] [atbm_log]:hw_priv->scan.status 0
+[   19.444996] [atbm_log]:atbm_scan_work:end(0)
+[   19.525592] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(2),scaned(2)
+[   19.533847] [atbm_log]:atbm_hw_scan:if_id(0)
+[   19.541174] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   19.546907] [atbm_log]:__ieee80211_scan_completed:1512
+[   19.553034] [atbm_log]:scan start band(0),(1)
+[   19.644467] [atbm_log]:hw_priv->scan.status 0
+[   19.649849] [atbm_log]:atbm_scan_work:end(0)
+[   19.725682] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(3),scaned(3)
+[   19.735296] [atbm_log]:atbm_hw_scan:if_id(0)
+[   19.741834] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   19.747582] [atbm_log]:__ieee80211_scan_completed:1512
+[   19.757083] [atbm_log]:scan start band(0),(1)
+[   19.849248] [atbm_log]:hw_priv->scan.status 0
+[   19.854521] [atbm_log]:atbm_scan_work:end(0)
+[   19.935605] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(4),scaned(4)
+[   19.944199] [atbm_log]:atbm_hw_scan:if_id(0)
+[   19.950431] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   19.963525] [atbm_log]:__ieee80211_scan_completed:1512
+[   19.969950] [atbm_log]:scan start band(0),(1)
+[   20.054102] [atbm_log]:hw_priv->scan.status 0
+[   20.059426] [atbm_log]:atbm_scan_work:end(0)
+[   20.135618] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(5),scaned(5)
+[   20.145242] [atbm_log]:atbm_hw_scan:if_id(0)
+[   20.150724] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   20.156420] [atbm_log]:__ieee80211_scan_completed:1512
+[   20.162457] [atbm_log]:scan start band(0),(1)
+[   20.258856] [atbm_log]:hw_priv->scan.status 0
+[   20.264105] [atbm_log]:atbm_scan_work:end(0)
+[   20.345590] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(6),scaned(6)
+[   20.362955] [atbm_log]:atbm_hw_scan:if_id(0)
+[   20.369493] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   20.380594] [atbm_log]:__ieee80211_scan_completed:1512
+[   20.386495] [atbm_log]:scan start band(0),(1)
+[   20.513745] [atbm_log]:hw_priv->scan.status 0
+[   20.519153] [atbm_log]:atbm_scan_work:end(0)
+[   20.595581] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(7),scaned(7)
+[   20.609482] [atbm_log]:atbm_hw_scan:if_id(0)
+[   20.614981] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   20.620935] [atbm_log]:__ieee80211_scan_completed:1512
+[   20.627252] [atbm_log]:scan start band(0),(1)
+[   20.770995] [atbm_log]:hw_priv->scan.status 0
+[   20.779003] [atbm_log]:atbm_scan_work:end(0)
+[   20.855600] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(8),scaned(8)
+[   20.863870] [atbm_log]:atbm_hw_scan:if_id(0)
+[   20.869508] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   20.879434] [atbm_log]:__ieee80211_scan_completed:1512
+[   20.885015] [atbm_log]:scan start band(0),(1)
+[   20.975992] [atbm_log]:hw_priv->scan.status 0
+[   20.981478] [atbm_log]:atbm_scan_work:end(0)
+[   21.065586] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(9),scaned(9)
+[   21.080919] [atbm_log]:atbm_hw_scan:if_id(0)
+[   21.086183] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   21.091948] [atbm_log]:__ieee80211_scan_completed:1512
+[   21.099108] [atbm_log]:scan start band(0),(1)
+[   21.180538] [atbm_log]:hw_priv->scan.status 0
+[   21.186269] [atbm_log]:atbm_scan_work:end(0)
+[   21.265628] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(10),scaned(10)
+[   21.278587] [atbm_log]:atbm_hw_scan:if_id(0)
+[   21.283789] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   21.290156] [atbm_log]:__ieee80211_scan_completed:1512
+[   21.296882] [atbm_log]:scan start band(0),(1)
+[   21.385338] [atbm_log]:hw_priv->scan.status 0
+[   21.390614] [atbm_log]:atbm_scan_work:end(0)
+[   21.475792] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(11),scaned(11)
+[   21.487094] [atbm_log]:atbm_hw_scan:if_id(0)
+[   21.492895] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   21.503280] [atbm_log]:__ieee80211_scan_completed:1512
+[   21.509232] [atbm_log]:scan start band(0),(1)
+[   21.590153] [atbm_log]:hw_priv->scan.status 0
+[   21.596496] [atbm_log]:atbm_scan_work:end(0)
+[   21.675643] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(12),scaned(12)
+[   21.687547] [atbm_log]:atbm_hw_scan:if_id(0)
+[   21.698370] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   21.703886] [atbm_log]:__ieee80211_scan_completed:1512
+[   21.709940] [atbm_log]:scan start band(0),(1)
+[   21.795116] [atbm_log]:hw_priv->scan.status 0
+[   21.800572] [atbm_log]:atbm_scan_work:end(0)
+[   21.875614] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(13),scaned(13)
+[   21.888021] [atbm_log]:atbm_hw_scan:if_id(0)
+[   21.900521] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   21.906204] [atbm_log]:__ieee80211_scan_completed:1512
+[   21.912241] [atbm_log]:scan start band(0),(1)
+[   21.999826] [atbm_log]:hw_priv->scan.status 0
+[   22.005208] [atbm_log]:atbm_scan_work:end(0)
+[   22.085620] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(14),scaned(14)
+[   22.094303] [atbm_log]:atbm_hw_scan:if_id(0)
+[   22.101485] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   22.109312] [atbm_log]:__ieee80211_scan_completed:1512
+[   22.115352] [atbm_log]:scan start band(0),(1)
+[   22.204626] [atbm_log]:hw_priv->scan.status 0
+[   22.209993] [atbm_log]:atbm_scan_work:end(0)
+[   22.744402] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(1),scaned(1)
+[   22.754733] [atbm_log]:atbm_hw_scan:if_id(0)
+[   22.760785] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   22.769229] [atbm_log]:scan start band(0),(1)
+[   22.819130] [atbm_log]:hw_priv->scan.status 0
+[   22.824553] [atbm_log]:atbm_scan_work:end(0)
+[   22.905641] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(2),scaned(2)
+[   22.913901] [atbm_log]:atbm_hw_scan:if_id(0)
+[   22.919500] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   22.925015] [atbm_log]:__ieee80211_scan_completed:1512
+[   22.946468] [atbm_log]:scan start band(0),(1)
+[   23.023862] [atbm_log]:hw_priv->scan.status 0
+[   23.033357] [atbm_log]:atbm_scan_work:end(0)
+[   23.115780] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(3),scaned(3)
+[   23.125836] [atbm_log]:atbm_hw_scan:if_id(0)
+[   23.144568] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   23.151127] [atbm_log]:__ieee80211_scan_completed:1512
+[   23.157081] [atbm_log]:scan start band(0),(1)
+[   23.228669] [atbm_log]:hw_priv->scan.status 0
+[   23.237118] [atbm_log]:atbm_scan_work:end(0)
+[   23.315640] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(4),scaned(4)
+[   23.323790] [atbm_log]:atbm_hw_scan:if_id(0)
+[   23.329507] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   23.338031] [atbm_log]:__ieee80211_scan_completed:1512
+[   23.344552] [atbm_log]:scan start band(0),(1)
+[   23.433702] [atbm_log]:hw_priv->scan.status 0
+[   23.439489] [atbm_log]:atbm_scan_work:end(0)
+[   23.515597] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(5),scaned(5)
+[   23.524296] [atbm_log]:atbm_hw_scan:if_id(0)
+[   23.530279] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   23.535920] [atbm_log]:__ieee80211_scan_completed:1512
+[   23.547615] [atbm_log]:scan start band(0),(1)
+[   23.638324] [atbm_log]:hw_priv->scan.status 0
+[   23.643696] [atbm_log]:atbm_scan_work:end(0)
+[   23.725568] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(6),scaned(6)
+[   23.744941] [atbm_log]:atbm_hw_scan:if_id(0)
+[   23.750403] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   23.756475] [atbm_log]:__ieee80211_scan_completed:1512
+[   23.762360] [atbm_log]:scan start band(0),(1)
+[   23.893447] [atbm_log]:hw_priv->scan.status 0
+[   23.900803] [atbm_log]:atbm_scan_work:end(0)
+[   23.986177] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(7),scaned(7)
+[   23.997070] [atbm_log]:atbm_hw_scan:if_id(0)
+[   24.002375] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   24.008025] [atbm_log]:__ieee80211_scan_completed:1512
+[   24.013831] [atbm_log]:scan start band(0),(1)
+[   24.150426] [atbm_log]:hw_priv->scan.status 0
+[   24.156107] [atbm_log]:atbm_scan_work:end(0)
+[   24.237721] [atbm_log]:ieee80211_prep_hw_scan:n_chans(1),space(1),index(8),scaned(8)
+[   24.245979] [atbm_log]:atbm_hw_scan:if_id(0)
+[   24.251830] [atbm_log]:atbm_hw_scan:scan, delay suspend
+[   24.257636] [atbm_log]:__ieee80211_scan_completed:1512
+[   24.263667] [atbm_log]:scan start band(0),(1)
