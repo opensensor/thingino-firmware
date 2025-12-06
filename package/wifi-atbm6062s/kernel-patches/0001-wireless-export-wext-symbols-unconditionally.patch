@@ -1,0 +1,28 @@
+From: Thingino <dev@thingino.com>
+Date: Fri, 6 Dec 2024 00:00:00 +0000
+Subject: [PATCH] wireless: make WIRELESS_EXT user-selectable
+
+Make CONFIG_WIRELESS_EXT user-selectable to allow enabling
+wireless extensions support for out-of-tree WiFi drivers that
+provide their own cfg80211 implementation.
+
+Signed-off-by: Thingino <dev@thingino.com>
+---
+ net/wireless/Kconfig | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/net/wireless/Kconfig b/net/wireless/Kconfig
+index 1e2e8dc..a2d76df 100644
+--- a/net/wireless/Kconfig
++++ b/net/wireless/Kconfig
+@@ -1,5 +1,6 @@
+ config WIRELESS_EXT
+-	bool
++	bool "Wireless extensions support"
++	default n
+
+ config WEXT_CORE
+ 	def_bool y
+--
+2.34.1
+

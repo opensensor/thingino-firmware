@@ -3,6 +3,12 @@ WIFI_ATBM6062S_SITE_METHOD = local
 
 WIFI_ATBM6062S_LICENSE = GPL-2.0
 
+# Apply kernel patch to export wireless extension symbols
+define WIFI_ATBM6062S_APPLY_KERNEL_PATCH
+	$(APPLY_PATCHES) $(LINUX_DIR) $(WIFI_ATBM6062S_PKGDIR)/kernel-patches 0001-wireless-export-wext-symbols-unconditionally.patch
+endef
+LINUX_PRE_PATCH_HOOKS += WIFI_ATBM6062S_APPLY_KERNEL_PATCH
+
 # Build using the driver's custom build system (Makefile.build.customer)
 # This provides WPA3 support via backported cfg80211/mac80211
 define WIFI_ATBM6062S_BUILD_CMDS
@@ -10,6 +16,8 @@ define WIFI_ATBM6062S_BUILD_CMDS
 		KERDIR=$(LINUX_DIR) \
 		arch=$(KERNEL_ARCH) \
 		CROSS_COMPILE=$(TARGET_CROSS) \
+		platform=PLATFORM_INGENICT41 \
+		ATBM_WIFI__EXT_CCFLAGS="-DATBM_WIFI_PLATFORM=23" \
 		install
 endef
 
@@ -23,11 +31,10 @@ endef
 define WIFI_ATBM6062S_LINUX_CONFIG_FIXUPS
 	$(call KCONFIG_ENABLE_OPT,CONFIG_WLAN)
 	$(call KCONFIG_ENABLE_OPT,CONFIG_WIRELESS)
+	# Enable WIRELESS_EXT to export wireless_send_event symbols (kernel patch makes it user-selectable)
 	$(call KCONFIG_ENABLE_OPT,CONFIG_WIRELESS_EXT)
 	$(call KCONFIG_ENABLE_OPT,CONFIG_WEXT_CORE)
-	$(call KCONFIG_ENABLE_OPT,CONFIG_WEXT_PROC)
-	$(call KCONFIG_ENABLE_OPT,CONFIG_WEXT_PRIV)
-	# Disable kernel's CFG80211/MAC80211 - driver provides its own with WPA3 support
+	# Disable kernel's CFG80211 and MAC80211 - driver provides its own with WPA3 support
 	$(call KCONFIG_DISABLE_OPT,CONFIG_CFG80211)
 	$(call KCONFIG_DISABLE_OPT,CONFIG_MAC80211)
 endef

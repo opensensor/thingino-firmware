@@ -32,11 +32,11 @@ start() {
 			suffix="${pin_raw:0-1}"
 
 			# convert suffix to binary state
-		case "$suffix" in
+			case "$suffix" in
 				o) state=0 ;;
 				O) state=1 ;;
 				*) echo_warning "Unknown suffix ${suffix}!" ;;
-		esac
+			esac
 
 			echo_info "Set GPIO $pin to $state"
 			gpio set "${pin}" "${state}"
@@ -51,32 +51,39 @@ start() {
 	if echo "$SDIO_MODULES" | grep -q "$wlan_module"; then
 		echo_info "$wlan_module is an SDIO module"
 
-			# Check if MDIO directory exists
-			if [ -d /proc/jz/mdio ]; then
+		# Check if MDIO directory exists
+		if [ -d /proc/jz/mdio ]; then
 			echo_info "GMAC is enabled, disabling MSC1..."
-			else
-				case "$SOC_FAMILY" in
-					t10 | t20 | t21 | t30 | t40 | t41)
+		else
+			case "$SOC_FAMILY" in
+				t10 | t20 | t21 | t30)
+					echo_info "Skip GPIO setup for $SOC_MODEL"
+					# Send INSERT to MMC1 for jzmmc_v12 driver
+					echo_info "Send INSERT to MMC1"
+					mmc 1
+					;;
+				t23 | t31)
+					if [ "t31a" = "$SOC_MODEL" ]; then
 						echo_info "Skip GPIO setup for $SOC_MODEL"
-						;;
-					t23 | t31)
-						if [ "t31a" = "$SOC_MODEL" ]; then
-							echo_info "Skip GPIO setup for $SOC_MODEL"
-							return 1
-						else
-							echo_info "Set GPIO pins with /sbin/mmc_gpio"
-							/sbin/mmc_gpio
-						fi
-						;;
-					*)
-						echo_error "Unsupported SOC type: $SOC_FAMILY"
-						exit 1
-						;;
-				esac
-
-			echo_info "Send INSERT to MMC1"
-				mmc 1
-			fi
+						return 1
+					else
+						echo_info "Set GPIO pins with /sbin/mmc_gpio"
+						/sbin/mmc_gpio
+					fi
+					# Send INSERT to MMC1 for jzmmc_v12 driver
+					echo_info "Send INSERT to MMC1"
+					mmc 1
+					;;
+				t40 | t41)
+					echo_info "Skip GPIO setup and manual card detection for $SOC_MODEL (using sdhci-ingenic)"
+					# T40/T41 use sdhci-ingenic driver which auto-detects SDIO cards
+					;;
+				*)
+					echo_error "Unsupported SOC type: $SOC_FAMILY"
+					exit 1
+					;;
+			esac
+		fi
 	else
 		echo_warning "MMC1 is not SDIO"
 	fi
@@ -89,8 +96,38 @@ start() {
 	if grep -q "^$wlan_module\b" /proc/modules; then
 		echo_info "Module $wlan_module is already loaded"
 	else
+		# For ATBM modules, load cfg80211 first
+		if echo "$wlan_module" | grep -q "atbm"; then
+			if ! grep -q "^cfg80211\b" /proc/modules; then
+				echo_info "Loading cfg80211 module first"
+				modprobe cfg80211 || echo_error "Failed to load cfg80211"
+			fi
+		fi
+
 		echo_info "Loading $wlan_module module with parameters $wlan_module_opts"
-		modprobe $wlan_module $wlan_module_opts
+		modprobe $wlan_module $wlan_module_opts &
+		modprobe_pid=$!
+
+		# Wait for module load with timeout
+		timeout=15
+		while [ $timeout -gt 0 ]; do
+			if grep -q "^$wlan_module\b" /proc/modules; then
+				echo_info "Module $wlan_module loaded successfully"
+				break
+			fi
+			if ! kill -0 $modprobe_pid 2>/dev/null; then
+				echo_error "modprobe process died unexpectedly"
+				break
+			fi
+			sleep 1
+			timeout=$((timeout - 1))
+		done
+
+		if [ $timeout -eq 0 ]; then
+			echo_error "Module load timed out after 15s, killing modprobe"
+			kill -9 $modprobe_pid 2>/dev/null
+			exit 1
+		fi
 	fi
 
 	m=50 # limit to 5 seconds
@@ -100,21 +137,21 @@ start() {
 		sleep 0.1
 	done
 
-	if [ -n "$wlan_mac" ] && [ "hi3881" != "$wlan_module" ]; then
-		if ip link | grep -q $IFACE >/dev/null; then
-			echo_info "Bring interface $IFACE down"
-			ip link set dev $IFACE down
-		fi
-
-		echo_info "Set MAC address to $wlan_mac"
-		ip link set dev $IFACE address $wlan_mac
+	if [ "$m" -eq 0 ]; then
+		echo_error "Timeout waiting for $IFACE"
+		exit 1
 	fi
+
+	echo_info "$IFACE is up"
 }
 
 stop() {
 	echo_title "Stopping wireless interface"
 
-	ifdown $IFACE
+	if grep -q "^$wlan_module\b" /proc/modules; then
+		echo_info "Unloading $wlan_module module"
+		modprobe -r $wlan_module
+	fi
 }
 
 case "$1" in
@@ -126,6 +163,7 @@ case "$1" in
 		;;
 	restart)
 		stop
+		sleep 1
 		start
 		;;
 	*)
@@ -135,3 +173,4 @@ case "$1" in
 esac
 
 exit 0
+

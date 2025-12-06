@@ -49,6 +49,13 @@ load_module() {
 start() {
 	echo_title "Initializing MMC"
 
+	# T40/T41 use built-in sdhci-ingenic driver, not jzmmc_v12 module
+	if [ "$SOC_FAMILY" = "t40" ] || [ "$SOC_FAMILY" = "t41" ]; then
+		echo_info "Using built-in sdhci-ingenic driver for $SOC_FAMILY"
+		set_power
+		exit 0
+	fi
+
 	MMC_PARAM="cd_gpio_pin=${gpio_mmc_cd:-59}"
 	load_module
 }
