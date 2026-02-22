@@ -1,0 +1,2 @@
+## environment settings for local compilation
+## lines starting with # will be ignored
