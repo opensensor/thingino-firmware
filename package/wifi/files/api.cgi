@@ -196,7 +196,8 @@ ap_scan=1
 network={
         ssid=\"$wlan_ssid\"
         psk=\"$wlan_pass\"
-	bgscan=\"simple:30:-70:3600\"
+        scan_ssid=1
+        bgscan=\"simple:30:-70:3600\"
 }
 " > /etc/wpa_supplicant.conf
 	fi
