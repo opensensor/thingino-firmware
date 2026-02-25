@@ -7,14 +7,18 @@
 
 API_KEY_FILE="/etc/thingino-api.key"
 
-# Verify API key from header (X-API-Key: your-key-here)
+# Verify API key from header (X-API-Key: your-key-here) or ?token= query param
 # Returns 0 if valid, 1 if invalid
 verify_api_key() {
   local provided_key="$HTTP_X_API_KEY"
 
-  # Also accept key as ?token= query parameter (e.g. snapshot URLs returned by ONVIF)
-  if [ -z "$provided_key" ] && [ -n "$QUERY_STRING" ]; then
-    provided_key=$(echo "$QUERY_STRING" | tr '&' '\n' | grep '^token=' | head -1 | cut -d'=' -f2-)
+  # Fall back to ?token= query parameter (used by ONVIF snapshot URLs)
+  if [ -z "$provided_key" ]; then
+    case "$QUERY_STRING" in
+      token=*) provided_key="${QUERY_STRING#token=}" ;;
+      *token=*) provided_key="${QUERY_STRING##*token=}" ;;
+    esac
+    provided_key="${provided_key%%&*}"
   fi
 
   [ -z "$provided_key" ] && return 1
