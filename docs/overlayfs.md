@@ -30,7 +30,7 @@ Files from this directory will go into a writable overlay parition of the final 
 edited or deleted on the camera, and these changes are permanent. Think of these files as of the first
 round of editing done on the camera itself.
 
-Please note, files from upper overlay are not part of the rootfs partition, and they are not packed into
+Please note, files from user overlay are not part of the rootfs partition, and they are not packed into
 the .tar bundle or rootfs.squahsfs files in the output images/ directory! Instead, these files end up in
 the config.jffs2 partition image.
 

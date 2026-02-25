@@ -84,8 +84,6 @@ make
 
 ### Advanced Variables
 
-**`SDCARD_DEVICE`** - SD card device for flashing (default: `/dev/sdf`)
-
 **`RELEASE`** - Build release firmware without local overrides
 ```bash
 make release  # Sets RELEASE=1
