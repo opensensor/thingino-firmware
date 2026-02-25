@@ -456,6 +456,7 @@ ap_scan=1
 network={
         ${ssid_line}
         ${pass_line}
+        scan_ssid=1
         bgscan=\"simple:30:-70:3600\"
 }
 " > /etc/wpa_supplicant.conf
