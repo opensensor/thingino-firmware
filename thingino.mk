@@ -1,5 +1,8 @@
 $(info --- FILE: thingino.mk)
 
+# Define qstrip if not already defined (usually defined by Buildroot)
+qstrip ?= $(strip $(subst ",,$(1)))
+
 SIZE_1G := 1073741824
 SIZE_512M := 536870912
 SIZE_256M := 268435456
@@ -508,10 +511,10 @@ export KERNEL_VERSION_4
 # IMAGE SENSOR
 #
 
-SENSOR_1_MODEL = $(strip $(subst ",,$(BR2_SENSOR_1_NAME)))
-SENSOR_2_MODEL = $(strip $(subst ",,$(BR2_SENSOR_2_NAME)))
-SENSOR_3_MODEL = $(strip $(subst ",,$(BR2_SENSOR_3_NAME)))
-SENSOR_4_MODEL = $(strip $(subst ",,$(BR2_SENSOR_4_NAME)))
+SENSOR_1_MODEL := $(call qstrip,$(BR2_SENSOR_1_NAME))
+SENSOR_2_MODEL := $(call qstrip,$(BR2_SENSOR_2_NAME))
+SENSOR_3_MODEL := $(call qstrip,$(BR2_SENSOR_3_NAME))
+SENSOR_4_MODEL := $(call qstrip,$(BR2_SENSOR_4_NAME))
 
 # Filter out "none" values
 ifeq ($(SENSOR_1_MODEL),none)
