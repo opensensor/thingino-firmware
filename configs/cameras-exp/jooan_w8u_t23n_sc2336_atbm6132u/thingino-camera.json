@@ -8,6 +8,9 @@
     "sensor_2": 16,
     "sensor_switch": 7,
     "white": 60,
-    "wlan": 6
+    "wlan": {
+      "pin": 6,
+      "toggle": true
+    }
   }
 }
