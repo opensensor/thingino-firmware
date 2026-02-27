@@ -104,6 +104,13 @@ The makefile uses conditional logic to build appropriate FFmpeg configure option
 - **Bitstream Filters**: Only enabled in lightnvr mode for format conversion
 - **MIPS Optimizations**: Includes MIPS FPU and DSP R2 optimizations for Ingenic T31X performance
 
+## Performance vs Size
+
+For IPC/NVR/lightNVR presets the default build uses `-Os` to reduce binary size.
+If you prefer maximum throughput (e.g. A1 NVR / XBurst2 decode + remux), enable:
+
+- `BR2_PACKAGE_THINGINO_FFMPEG_OPTIMIZE_SPEED` (switches non-DEV presets to `-O2`)
+
 ## Size Optimization
 
 The granular configuration allows for significant size reduction by only including needed codecs:

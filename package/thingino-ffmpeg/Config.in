@@ -46,6 +46,15 @@ config BR2_PACKAGE_THINGINO_FFMPEG_DEV
 
 endchoice
 
+config BR2_PACKAGE_THINGINO_FFMPEG_OPTIMIZE_SPEED
+	bool "Prefer speed over size (-O2)"
+	help
+	  Use a speed-optimized compiler setting for the non-DEV presets.
+	  When disabled, the IPC/NVR/lightNVR presets use -Os to minimize size.
+
+	  Enable this on A1 NVR / XBurst2 when decode + remux throughput is
+	  more important than binary size.
+
 config BR2_PACKAGE_THINGINO_FFMPEG_LIGHTNVR
 	bool
 	default y if BR2_PACKAGE_LIGHTNVR
