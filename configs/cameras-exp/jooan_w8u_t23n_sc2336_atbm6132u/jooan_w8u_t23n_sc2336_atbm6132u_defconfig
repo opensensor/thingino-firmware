@@ -1,6 +1,6 @@
 # NAME: Jooan W8U (T23N, SC2336P, ATBM6132U)
 # FRAG: soc-xburst1 toolchain-xburst1 ccache brand rootfs kernel system target uboot ssl
-BR2_ISP_CLK_300MHZ=y
+BR2_ISP_CLK_200MHZ=y
 BR2_ISP_DIRECT_MODE_2=y
 BR2_ISP_IVDC_MEM_LINE=y
 BR2_ISP_IVDC_MEM_LINE_VALUE=540
