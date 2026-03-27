@@ -18,6 +18,8 @@ INGENIC_SDK_MODULE_MAKE_OPTS = \
 
 ifeq ($(KERNEL_VERSION),3.10.14)
 INGENIC_SDK_EXTRA_CFLAGS = -DCONFIG_KERNEL_3_10
+else ifeq ($(KERNEL_VERSION),5.10)
+INGENIC_SDK_EXTRA_CFLAGS = -DCONFIG_KERNEL_5_10
 else
 INGENIC_SDK_EXTRA_CFLAGS = -DCONFIG_KERNEL_4_4_94
 endif
@@ -30,6 +32,12 @@ endef
 endif
 
 INGENIC_SDK_MODULE_MAKE_OPTS += EXTRA_CFLAGS="$(INGENIC_SDK_EXTRA_CFLAGS)"
+
+# Allow undefined symbols in modpost for kernel 5.10/5.15 (ISP firmware blob
+# was compiled against 4.4 and references symbols not exported in 5.10+)
+ifneq ($(filter 5.10 5.15,$(KERNEL_VERSION)),)
+INGENIC_SDK_MODULE_MAKE_OPTS += KBUILD_MODPOST_WARN=1
+endif
 
 # Per-camera IQ file overrides (paths relative to BR2_EXTERNAL root)
 ifneq ($(call qstrip,$(BR2_SENSOR_1_IQ_FILE)),)
@@ -223,6 +231,16 @@ define INGENIC_SDK_INSTALL_TARGET_CMDS
 	$(GENERATE_GPIO_USERKEYS_CONFIG)
 	[ "$(BR2_THINGINO_AUDIO)" = "y" ] && $(INSTALL_AUDIO_SUPPORT)
 endef
+
+# 5.15 kernel support: copy 5.10 modules as a starting point
+define INGENIC_SDK_POST_EXTRACT_515
+	if [ ! -d $(@D)/5.15 ] && [ -d $(@D)/5.10 ]; then \
+		cp -a $(@D)/5.10 $(@D)/5.15; \
+	fi
+endef
+INGENIC_SDK_POST_EXTRACT_HOOKS += INGENIC_SDK_POST_EXTRACT_515
+
+
 
 $(eval $(kernel-module))
 $(eval $(generic-package))

@@ -93,6 +93,11 @@ ifeq ($(BR2_TOOLCHAIN_USES_UCLIBC),y)
 endif
 
 PRUDYNT_CFLAGS += -DPLATFORM_$(shell echo $(SOC_FAMILY) | tr a-z A-Z)
+# T32 uses its own SDK headers (IMPEncoderCHNAttr is native)
+# but also needs PLATFORM_T31 for shared hal compat defines
+ifeq ($(SOC_FAMILY),t32)
+	PRUDYNT_CFLAGS += -DPLATFORM_T31
+endif
 ifeq ($(KERNEL_VERSION),4.4.94)
 	PRUDYNT_CFLAGS += -DKERNEL_VERSION_4
 endif
@@ -183,13 +188,39 @@ else
 	PRUDYNT_T_USE_EXECINFO = 0
 endif
 
+# T32 uses its own SDK headers at include/T32/1.0.6/en/
+ifeq ($(SOC_FAMILY),t32)
+PRUDYNT_SDK_VERSION := 1.0.6
+PRUDYNT_LDFLAGS += -Wl,--no-as-needed -lt32compat -Wl,--as-needed
+else
+PRUDYNT_SDK_VERSION := $(SDK_VERSION)
+endif
+
+# Copy T32 SDK headers into prudynt-t include tree and patch Makefile
+ifeq ($(SOC_FAMILY),t32)
+T32_SDK_HEADERS = $(TOPDIR)/../../Ingenic-SDK-T32/media/en/include
+
+define PRUDYNT_T_COPY_T32_HEADERS
+	mkdir -p $(@D)/include/T32/$(PRUDYNT_SDK_VERSION)/en
+	cp -a $(T32_SDK_HEADERS)/imp $(@D)/include/T32/$(PRUDYNT_SDK_VERSION)/en/
+	cp -a $(T32_SDK_HEADERS)/sysutils $(@D)/include/T32/$(PRUDYNT_SDK_VERSION)/en/
+	# Patch Makefile to add PLATFORM_T32 case BEFORE T31
+	sed -i '/^else ifneq.*PLATFORM_T31/i \
+else ifneq (,$$(findstring -DPLATFORM_T32,$$(CFLAGS)))\n\
+    LIBIMP_PLATFORM        := T32\n\
+    LIBIMP_LANG            := en\n\
+    LIBIMP_DEFAULT_SDK_VERSION := 1.0.6' $(@D)/Makefile
+endef
+PRUDYNT_T_POST_EXTRACT_HOOKS += PRUDYNT_T_COPY_T32_HEADERS
+endif
+
 define PRUDYNT_T_BUILD_CMDS
 	$(MAKE) \
 		ARCH=$(TARGET_ARCH) \
 		CROSS_COMPILE=$(TARGET_CROSS) \
 		CFLAGS="$(PRUDYNT_CFLAGS)" \
 		LDFLAGS="$(PRUDYNT_LDFLAGS)" \
-		SDK_VERSION="$(SDK_VERSION)" \
+		SDK_VERSION="$(PRUDYNT_SDK_VERSION)" \
 		$(if $(filter y,$(BR2_PACKAGE_PRUDYNT_T_DEBUG)),DEBUG=1 DEBUG_STRIP=0,DEBUG_STRIP=1) \
 		$(if $(BR2_PACKAGE_PRUDYNT_T_FFMPEG),USE_FFMPEG=1) \
 		$(if $(BR2_PACKAGE_PRUDYNT_T_WEBRTC),WEBRTC_ENABLED=1,) \

@@ -45,6 +45,9 @@ t31zx,t31,1,128,isvp_t31_sfcnor_ddr128M,isvp_t31_sfcnand_ddr128M
 # C100 Family (special case, see script for kernel version handling)
 c100,t31,1,128,isvp_c100_sfcnor,isvp_c100_sfcnand
 
+# T32 Family
+t32n,t32,1,128,isvp_t31_sfcnor_ddr128M,-
+
 # T40 Family
 t40n,t40,2,128,isvp_t40n_sfcnor,isvp_t40n_sfcnand
 t40nn,t40,2,128,isvp_t40n_sfcnor,isvp_t40n_sfcnand

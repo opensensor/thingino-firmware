@@ -8,6 +8,7 @@ INGENIC_LIB_LICENSE = GPL-2.0
 INGENIC_LIB_LICENSE_FILES = COPYING
 
 # Determine libc name based on variables
+# Note: T32 only ships glibc and uclibc blobs, so musl falls back to uclibc
 ifeq ($(BR2_TOOLCHAIN_USES_GLIBC),y)
 	SDK_LIBC_NAME := glibc
 else
@@ -49,7 +50,7 @@ else ifeq ($(SOC_FAMILY),t31)
 		SDK_VERSION := 1.1.6
 	endif
 else ifeq ($(SOC_FAMILY),t32)
-	SDK_VERSION := 1.0.4
+	SDK_VERSION := 1.0.6
 else ifeq ($(SOC_FAMILY),t40)
 	SDK_VERSION := 1.2.0
 else ifeq ($(SOC_FAMILY),t41)
@@ -69,9 +70,22 @@ $(info SDK_LIBC_VERSION: $(SDK_LIBC_VERSION))
 $(info SDK_LIBC_NAME: $(SDK_LIBC_NAME))
 $(info Building using libs for $(SDK_LIBC_NAME) GCC $(SDK_LIBC_VERSION) toolchain from $(SDK_VERSION) SDK)
 
+# T32 libs use a flat directory structure without GCC version subdirectory:
+#   T32/lib/<sdk_version>/<libc_name>/*.so
+# All other SoCs use:
+#   <SOC>/lib/<sdk_version>/<libc_name>/<gcc_version>/*.so
+ifeq ($(SOC_FAMILY),t32)
+	SDK_LIB_DIR = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)
+else
+	SDK_LIB_DIR = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)
+endif
+
 ifneq ($(filter t40 t41 a1,$(SOC_FAMILY)),)
 	# For T40/T41/A1, use their native version regardless of libc type
-	LIBALOG_FILE = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)/libalog.so
+	LIBALOG_FILE = $(SDK_LIB_DIR)/libalog.so
+else ifeq ($(SOC_FAMILY),t32)
+	# T32 has its own libalog
+	LIBALOG_FILE = $(SDK_LIB_DIR)/libalog.so
 else
 	# For all other XBurst1 SoCs
 	ifeq ($(SDK_LIBC_NAME),uclibc)
@@ -79,24 +93,41 @@ else
 		LIBALOG_FILE = $(@D)/T31/lib/1.1.6/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)/libalog.so
 	else
 		# With non-uclibc (including T31 with glibc/musl), use their corresponding libc version
-		LIBALOG_FILE = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)/libalog.so
+		LIBALOG_FILE = $(SDK_LIB_DIR)/libalog.so
 	endif
+endif
+
+# T32 compat shim: provides stat64/lseek64 wrappers and IMP API stubs
+# for functions missing from the T32 SDK but used by prudynt-t
+ifeq ($(SOC_FAMILY),t32)
+T32_SHIM_SRC = $(INGENIC_LIB_PKGDIR)/t32-compat-shim.c
+
+define INGENIC_LIB_BUILD_T32_SHIM
+	$(TARGET_CC) $(TARGET_CFLAGS) -shared -fPIC -o $(@D)/libt32compat.so $(T32_SHIM_SRC)
+endef
+INGENIC_LIB_POST_BUILD_HOOKS += INGENIC_LIB_BUILD_T32_SHIM
 endif
 
 define INGENIC_LIB_INSTALL_STAGING_CMDS
 	$(INSTALL) -m 0644 -t $(STAGING_DIR)/usr/lib/ \
-		$(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)/*.so
+		$(SDK_LIB_DIR)/*.so
 
 	$(INSTALL) -D -m 0644 $(LIBALOG_FILE) \
 		$(STAGING_DIR)/usr/lib/libalog.so
+
+	$(if $(wildcard $(@D)/libt32compat.so), \
+		$(INSTALL) -m 0644 $(@D)/libt32compat.so $(STAGING_DIR)/usr/lib/libt32compat.so)
 endef
 
 define INGENIC_LIB_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0644 -t $(TARGET_DIR)/usr/lib/ \
-		$(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)/*.so
+		$(SDK_LIB_DIR)/*.so
 
 	$(INSTALL) -D -m 0644 $(LIBALOG_FILE) \
 		$(TARGET_DIR)/usr/lib/libalog.so
+
+	$(if $(wildcard $(@D)/libt32compat.so), \
+		$(INSTALL) -m 0644 $(@D)/libt32compat.so $(TARGET_DIR)/usr/lib/libt32compat.so)
 endef
 
 $(eval $(generic-package))

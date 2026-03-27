@@ -449,7 +449,15 @@ else
 	done
 	# add kernel-specific headers based on SOC requirements
 	# @if [ "$(SOC_FAMILY)" = "t23" ] || [ "$(SOC_FAMILY)" = "t40" ] || [ "$(SOC_FAMILY)" = "t41" ] || [ "$(SOC_FAMILY)" = "a1" ]; then
-	@if [ "$(KERNEL_VERSION_4)" = "y" ]; then \
+	@if [ "$(KERNEL_VERSION_515)" = "y" ]; then \
+		echo "** add kernel headers: 5.15 (SOC: $(SOC_FAMILY))"; \
+		echo "BR2_KERNEL_HEADERS_5_15=y" >>$(OUTPUT_DIR)/.config; \
+		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_15=y" >>$(OUTPUT_DIR)/.config; \
+	elif [ "$(KERNEL_VERSION_5)" = "y" ]; then \
+		echo "** add kernel headers: 5.10 (SOC: $(SOC_FAMILY))"; \
+		echo "BR2_KERNEL_HEADERS_5_10=y" >>$(OUTPUT_DIR)/.config; \
+		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_10=y" >>$(OUTPUT_DIR)/.config; \
+	elif [ "$(KERNEL_VERSION_4)" = "y" ]; then \
 		echo "** add kernel headers: 4.4 (SOC: $(SOC_FAMILY))"; \
 		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_4_4=y" >>$(OUTPUT_DIR)/.config; \
 		echo "BR2_TOOLCHAIN_EXTERNAL_HEADERS_4_4=y" >>$(OUTPUT_DIR)/.config; \
@@ -485,6 +493,11 @@ endif
 	fi
 	cp $(OUTPUT_DIR)/.config $(OUTPUT_DIR)/.config_original
 	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
+ifeq ($(KERNEL_VERSION_5),y)
+	# Disable out-of-tree modules incompatible with kernel 5.10+
+	sed -i 's/^BR2_PACKAGE_EXFAT_NOFUSE=y/# BR2_PACKAGE_EXFAT_NOFUSE is not set/' $(OUTPUT_DIR)/.config
+	sed -i 's/^BR2_PACKAGE_WIREGUARD_LINUX_COMPAT=y/# BR2_PACKAGE_WIREGUARD_LINUX_COMPAT is not set/' $(OUTPUT_DIR)/.config
+endif
 	# Create dependency tracking file
 	@echo "# Configuration dependency tracking file" > $(CONFIG_DEPS_FILE)
 	@echo "# Generated on $$(date)" >> $(CONFIG_DEPS_FILE)
@@ -500,6 +513,11 @@ defconfig: check-config
 	@$(TEAL) "$@"
 	# Ensure buildroot is properly configured
 	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
+ifeq ($(KERNEL_VERSION_5),y)
+	# Disable out-of-tree modules incompatible with kernel 5.10+
+	sed -i 's/^BR2_PACKAGE_EXFAT_NOFUSE=y/# BR2_PACKAGE_EXFAT_NOFUSE is not set/' $(OUTPUT_DIR)/.config
+	sed -i 's/^BR2_PACKAGE_WIREGUARD_LINUX_COMPAT=y/# BR2_PACKAGE_WIREGUARD_LINUX_COMPAT is not set/' $(OUTPUT_DIR)/.config
+endif
 
 # Configuration debugging and maintenance targets
 show-config-deps:
