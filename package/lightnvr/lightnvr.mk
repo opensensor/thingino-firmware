@@ -34,8 +34,10 @@ LIGHTNVR_CONF_OPTS = \
 # Web assets are no longer checked into git, so we build them here
 define LIGHTNVR_BUILD_WEB_ASSETS
 	@echo "Building LightNVR web assets..."
-	cd $(@D)/web && \
+	cd $(@D) && \
 		export PATH=$(HOST_DIR)/bin/:$$PATH && \
+		$(HOST_DIR)/bin/node ./scripts/extract_version.js && \
+		cd web && \
 		$(HOST_DIR)/bin/npm ci --production=false && \
 		$(HOST_DIR)/bin/npm run build
 	@echo "Web assets built successfully"

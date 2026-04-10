@@ -4,6 +4,7 @@ LINUX_EXTENSIONS += thingino-kopt
 # Format: CONFIG_SUFFIX|CAMERA_MODEL|DESTINATION_FILE
 THINGINO_DTS_MAPPINGS = \
 	WYZEC3P|wyze_cam3pro_t40xp|shark \
+	WYZEC4|wyze_camv4_t41nq|marmot \
 	A1_SMART_NVR|smart_nvr_a1n_eth|tucana \
         IGETC5PT|iget_c5pt_t41lq|marmot
 
