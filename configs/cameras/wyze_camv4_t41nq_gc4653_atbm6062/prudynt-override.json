@@ -1,0 +1,34 @@
+{
+  "image": {
+    "isp_bypass": false,
+    "vflip": false,
+    "hflip": false
+  },
+  "stream0": {
+    "enabled": true,
+    "width": 2560,
+    "height": 1440,
+    "fps": 30,
+    "gop": 60,
+    "buffers": 3,
+    "bitrate": 4096,
+    "format": "H264"
+  },
+  "stream1": {
+    "enabled": true,
+    "width": 640,
+    "height": 360,
+    "fps": 15,
+    "gop": 30,
+    "buffers": 2,
+    "bitrate": 512,
+    "format": "H264"
+  },
+  "jpeg": {
+    "enabled": true,
+    "width": 2560,
+    "height": 1440,
+    "qfactor": 75
+  }
+}
+
