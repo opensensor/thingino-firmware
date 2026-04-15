@@ -1,5 +1,5 @@
-INGENIC_UCLIBC_VERSION = 97c9ba8
-INGENIC_UCLIBC_SITE = https://github.com/gtxaspec/ingenic-uclibc
+INGENIC_UCLIBC_VERSION = 930fdfa
+INGENIC_UCLIBC_SITE = https://github.com/opensensor/ingenic-uclibc
 INGENIC_UCLIBC_SITE_METHOD = git
 INGENIC_UCLIBC_INSTALL_STAGING = YES
 

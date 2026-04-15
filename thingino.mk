@@ -45,8 +45,16 @@ export SOC_ARCH
 
 # default to older kernel if none set
 ifeq ($(KERNEL_VERSION),)
-	ifeq ($(KERNEL_VERSION_4),y)
+	ifeq ($(KERNEL_VERSION_7),y)
+		KERNEL_VERSION := 7.0
+	else ifeq ($(KERNEL_VERSION_515),y)
+		KERNEL_VERSION := 5.15
+	else ifeq ($(KERNEL_VERSION_5),y)
+		KERNEL_VERSION := 5.10
+	else ifeq ($(KERNEL_VERSION_4),y)
 		KERNEL_VERSION := 4.4.94
+	else ifeq ($(SOC_FAMILY),t32)
+		KERNEL_VERSION := 5.15
 	else ifeq ($(SOC_FAMILY),t41)
 		KERNEL_VERSION := 4.4.94
 	else ifeq ($(SOC_FAMILY),t40)
@@ -76,8 +84,22 @@ else ifeq ($(SOC_FAMILY),t41)
 	endif
 else ifeq ($(SOC_FAMILY),t40)
 	KERNEL_BRANCH := ingenic-t40
+else ifeq ($(SOC_FAMILY),t32)
+	ifeq ($(KERNEL_VERSION),7.0)
+		KERNEL_BRANCH :=
+	else ifeq ($(KERNEL_VERSION),5.15)
+		KERNEL_BRANCH :=
+	else
+		KERNEL_BRANCH := ingenic-t31
+	endif
 else ifeq ($(SOC_FAMILY),t31)
-	ifeq ($(KERNEL_VERSION),4.4.94)
+	ifeq ($(KERNEL_VERSION),7.0)
+		KERNEL_BRANCH :=
+	else ifeq ($(KERNEL_VERSION),5.15)
+		KERNEL_BRANCH :=
+	else ifeq ($(KERNEL_VERSION),5.10)
+		KERNEL_BRANCH :=
+	else ifeq ($(KERNEL_VERSION),4.4.94)
 		KERNEL_BRANCH := ingenic-t31-4.4.94
 	else
 		KERNEL_BRANCH := ingenic-t31
@@ -93,12 +115,26 @@ else
 	KERNEL_BRANCH := ingenic-t31
 endif
 
+# For local kernel builds (5.10/5.15/7.0), skip git hash lookup
+ifneq ($(KERNEL_VERSION),5.10)
+ifneq ($(KERNEL_VERSION),5.15)
+ifneq ($(KERNEL_VERSION),7.0)
 ifeq ($(KERNEL_HASH),)
 	KERNEL_HASH := $(shell git ls-remote $(KERNEL_SITE) $(KERNEL_BRANCH) | head -1 | cut -f1)
 endif
 KERNEL_TARBALL_URL := $(KERNEL_SITE)/archive/$(KERNEL_HASH).tar.gz
+endif
+endif
+endif
 
-ifeq ($(KERNEL_VERSION),4.4.94)
+ifeq ($(KERNEL_VERSION),7.0)
+KERNEL_VERSION_7 := y
+else ifeq ($(KERNEL_VERSION),5.15)
+KERNEL_VERSION_5 := y
+KERNEL_VERSION_515 := y
+else ifeq ($(KERNEL_VERSION),5.10)
+KERNEL_VERSION_5 := y
+else ifeq ($(KERNEL_VERSION),4.4.94)
 KERNEL_VERSION_4 := y
 else
 KERNEL_VERSION_4 := n
@@ -110,6 +146,8 @@ export KERNEL_SITE
 export KERNEL_TARBALL_URL
 export KERNEL_VERSION
 export KERNEL_VERSION_4
+export KERNEL_VERSION_515
+export KERNEL_VERSION_7
 
 #
 # IMAGE SENSOR

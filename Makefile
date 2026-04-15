@@ -44,9 +44,6 @@ SCRIPTS_DIR := $(BR2_EXTERNAL)/scripts
 BR2_DL_DIR ?= $(BR2_EXTERNAL)/dl
 
 THINGINO_USER_DIR ?= $(BR2_EXTERNAL)/user
-ifdef PRISTINE
-THINGINO_USER_DIR := /dev/null
-endif
 export THINGINO_USER_DIR
 THINGINO_USER_COMMON_DIR := $(THINGINO_USER_DIR)/common
 
@@ -338,8 +335,8 @@ BR2_MAKE = $(MAKE) -C $(BR2_EXTERNAL)/buildroot \
 
 .PHONY: all bootstrap build build_fast clean clean-nfs-debug cleanbuild defconfig distclean \
 	dev fast help pack remove_bins repack sdk toolchain update upboot-ota \
-	upload_tftp cloner ota br-% check-config force-config show-config-deps clean-config \
-	tftpd-start tftpd-stop tftpd-restart tftpd-status tftpd-logs show-vars run user-dirs
+	upload_tftp upload_serial upgrade_ota br-% check-config force-config show-config-deps clean-config \
+	tftpd-start tftpd-stop tftpd-restart tftpd-status tftpd-logs show-vars run
 
 # Run a binary under QEMU in the build sysroot.
 # Usage: CAMERA=<camera> make run CMD="/bin/ffmpeg --help"  (binary with args)
@@ -502,7 +499,19 @@ else
 	done
 	# add kernel-specific headers based on SOC requirements
 	# @if [ "$(SOC_FAMILY)" = "t23" ] || [ "$(SOC_FAMILY)" = "t40" ] || [ "$(SOC_FAMILY)" = "t41" ] || [ "$(SOC_FAMILY)" = "a1" ]; then
-	@if [ "$(KERNEL_VERSION_4)" = "y" ]; then \
+	@if [ "$(KERNEL_VERSION_7)" = "y" ]; then \
+		echo "** add kernel headers: 7.0 (SOC: $(SOC_FAMILY))"; \
+		echo "BR2_KERNEL_HEADERS_AS_KERNEL=y" >>$(OUTPUT_DIR)/.config; \
+		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_19=y" >>$(OUTPUT_DIR)/.config; \
+	elif [ "$(KERNEL_VERSION_515)" = "y" ]; then \
+		echo "** add kernel headers: 5.15 (SOC: $(SOC_FAMILY))"; \
+		echo "BR2_KERNEL_HEADERS_5_15=y" >>$(OUTPUT_DIR)/.config; \
+		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_15=y" >>$(OUTPUT_DIR)/.config; \
+	elif [ "$(KERNEL_VERSION_5)" = "y" ]; then \
+		echo "** add kernel headers: 5.10 (SOC: $(SOC_FAMILY))"; \
+		echo "BR2_KERNEL_HEADERS_5_10=y" >>$(OUTPUT_DIR)/.config; \
+		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_10=y" >>$(OUTPUT_DIR)/.config; \
+	elif [ "$(KERNEL_VERSION_4)" = "y" ]; then \
 		echo "** add kernel headers: 4.4 (SOC: $(SOC_FAMILY))"; \
 		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_4_4=y" >>$(OUTPUT_DIR)/.config; \
 		echo "BR2_TOOLCHAIN_EXTERNAL_HEADERS_4_4=y" >>$(OUTPUT_DIR)/.config; \
@@ -538,6 +547,12 @@ endif
 	fi
 	cp $(OUTPUT_DIR)/.config $(OUTPUT_DIR)/.config_original
 	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
+ifneq ($(filter y,$(KERNEL_VERSION_5) $(KERNEL_VERSION_7)),)
+	# Disable out-of-tree modules incompatible with kernel 5.10+
+	sed -i 's/^BR2_PACKAGE_EXFAT_NOFUSE=y/# BR2_PACKAGE_EXFAT_NOFUSE is not set/' $(OUTPUT_DIR)/.config
+	sed -i 's/^BR2_PACKAGE_WIREGUARD_LINUX_COMPAT=y/# BR2_PACKAGE_WIREGUARD_LINUX_COMPAT is not set/' $(OUTPUT_DIR)/.config
+	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
+endif
 	# Create dependency tracking file
 	@echo "# Configuration dependency tracking file" > $(CONFIG_DEPS_FILE)
 	@echo "# Generated on $$(date)" >> $(CONFIG_DEPS_FILE)
@@ -553,6 +568,11 @@ defconfig: check-config
 	@$(TEAL) "$@"
 	# Ensure buildroot is properly configured
 	$(BR2_MAKE) BR2_DEFCONFIG=$(CAMERA_CONFIG_REAL) olddefconfig
+ifneq ($(filter y,$(KERNEL_VERSION_5) $(KERNEL_VERSION_7)),)
+	# Disable out-of-tree modules incompatible with kernel 5.10+
+	sed -i 's/^BR2_PACKAGE_EXFAT_NOFUSE=y/# BR2_PACKAGE_EXFAT_NOFUSE is not set/' $(OUTPUT_DIR)/.config
+	sed -i 's/^BR2_PACKAGE_WIREGUARD_LINUX_COMPAT=y/# BR2_PACKAGE_WIREGUARD_LINUX_COMPAT is not set/' $(OUTPUT_DIR)/.config
+endif
 
 # Configuration debugging and maintenance targets
 show-config-deps:
@@ -710,8 +730,17 @@ upboot_ota:
 	test -f "$$fw_path" || { echo "ERROR: Neither $(U_BOOT_BIN) nor $(GENERIC_U_BOOT_BIN) was found. Run make first."; exit 1; }; \
 	$(SCRIPTS_DIR)/fw_ota.sh "$$fw_path" $(CAMERA_IP_ADDRESS)
 
+# flash compiled update image to the camera
+update_ota:
+	@$(TEAL) "$@"
+	@[ -n "$(CAMERA_IP_ADDRESS)" ] || { echo "ERROR: IP is required for $@. Use 'make $@ IP=<camera-ip>'."; exit 1; }
+	@fw_path="$(FIRMWARE_BIN_NOBOOT)"; \
+	if [ ! -f "$$fw_path" ]; then fw_path="$(GENERIC_FIRMWARE_BIN_NOBOOT)"; fi; \
+	test -f "$$fw_path" || { echo "ERROR: Neither $(FIRMWARE_BIN_NOBOOT) nor $(GENERIC_FIRMWARE_BIN_NOBOOT) was found. Run make first."; exit 1; }; \
+	$(SCRIPTS_DIR)/fw_ota.sh "$$fw_path" $(CAMERA_IP_ADDRESS)
+
 # flash compiled full image to the camera
-ota:
+upgrade_ota:
 	@$(TEAL) "$@"
 	@[ -n "$(CAMERA_IP_ADDRESS)" ] || { echo "ERROR: IP is required for $@. Use 'make $@ IP=<camera-ip>'."; exit 1; }
 	@fw_path="$(FIRMWARE_BIN_FULL)"; \
@@ -1006,7 +1035,10 @@ help:
 	  make upboot_ota IP=192.168.1.10\n\
 	                      upload bootloader to the camera\n\
 	                        over network, and flash it\n\n\
-	  make ota IP=192.168.1.10\n\
+	  make update_ota IP=192.168.1.10\n\
+	                      upload kernel and roofts to the camera\n\
+	                        over network, and flash them\n\n\
+	  make upgrade_ota IP=192.168.1.10\n\
 	                      upload full firmware image to the camera\n\
 	                        over network, and flash it\n\n\
 	"
@@ -1076,7 +1108,7 @@ run:
 	@$(TEAL) "$@"
 	$(SCRIPTS_DIR)/qemu_run.sh $(OUTPUT_DIR)/target $(_RUN_CMD)
 
-cloner:
+upload_serial:
 	@$(TEAL) "$@"
 	@test -f $(FIRMWARE_BIN_FULL) || { echo "ERROR: $(FIRMWARE_BIN_FULL) not found. Run make first."; exit 1; }
 	$(HOST_DIR)/bin/thingino-cloner -i 0 -b -w $(FIRMWARE_BIN_FULL) --cpu $(SOC_FAMILY) --firmware-dir $(HOST_DIR)/share/thingino-cloner/firmwares --reboot
