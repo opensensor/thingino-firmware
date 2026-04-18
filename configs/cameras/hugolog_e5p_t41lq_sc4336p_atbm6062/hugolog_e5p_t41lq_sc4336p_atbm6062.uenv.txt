@@ -1,0 +1,10 @@
+# Stock firmware wifi driver: /app/drivers/atbm606x_wifi_usb.ko — VID 0x007A PID 0x6052 on dwc2.
+# Wifi chip power-enable is GPIO 60 (confirmed on hardware). The chip needs a
+# low->high reset pulse to start presenting on USB, which is handled by
+# S36wireless via gpio.wlan { pin:60, toggle:true } in thingino.json — see
+# configs/cameras/hugolog_e5p_t41lq_sc4336p_atbm6062/thingino.json
+gpio_ircut=49
+gpio_mmc_power=71o
+gpio_motor_h=84 83
+gpio_speaker=63
+wlan_module=atbm6062u

@@ -1,0 +1,8 @@
+{
+  "gpio": {
+    "wlan": {
+      "pin": 60,
+      "toggle": true
+    }
+  }
+}
