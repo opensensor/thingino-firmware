@@ -1,7 +1,7 @@
 OPEN_TX_ISP_SITE_METHOD = git
 OPEN_TX_ISP_SITE = https://github.com/opensensor/open-tx-isp
 OPEN_TX_ISP_SITE_BRANCH = main
-OPEN_TX_ISP_VERSION = 3735aace
+OPEN_TX_ISP_VERSION = bde9e3e6
 
 OPEN_TX_ISP_LICENSE = GPL-2.0
 OPEN_TX_ISP_LICENSE_FILES = LICENSE
@@ -16,8 +16,9 @@ OPEN_TX_ISP_MODULE_MAKE_OPTS = \
 	INSTALL_MOD_PATH=$(TARGET_DIR) \
 	INSTALL_MOD_DIR=ingenic
 
-# Buildroot enters driver/ via MODULE_SUBDIRS, so DIR is relative to that
-OPEN_TX_ISP_MODULE_MAKE_OPTS += DIR=.
+# No DIR= — objs sit at M= root. Setting DIR=. made Kbuild map each source's
+# KBUILD_MODNAME to its own filename (e.g. tx_isp_module) instead of tx_isp_t31,
+# breaking modpost's MODULE_LICENSE check on the linked module.
 
 # Add XBurst platform include paths for soc headers
 OPEN_TX_ISP_MODULE_MAKE_OPTS += \

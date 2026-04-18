@@ -502,7 +502,7 @@ else
 	@if [ "$(KERNEL_VERSION_7)" = "y" ]; then \
 		echo "** add kernel headers: 7.0 (SOC: $(SOC_FAMILY))"; \
 		echo "BR2_KERNEL_HEADERS_AS_KERNEL=y" >>$(OUTPUT_DIR)/.config; \
-		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_19=y" >>$(OUTPUT_DIR)/.config; \
+		echo "BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_7_0=y" >>$(OUTPUT_DIR)/.config; \
 	elif [ "$(KERNEL_VERSION_515)" = "y" ]; then \
 		echo "** add kernel headers: 5.15 (SOC: $(SOC_FAMILY))"; \
 		echo "BR2_KERNEL_HEADERS_5_15=y" >>$(OUTPUT_DIR)/.config; \
@@ -842,6 +842,8 @@ $(FIRMWARE_BIN_FULL): $(U_BOOT_BIN) $(UB_ENV_BIN) $(CONFIG_BIN) $(KERNEL_BIN) $(
 	dd if=/dev/zero bs=8M skip=0 count=1 status=none | tr '\000' '\377' > $@
 	# add bootloader partition
 	dd if=$(U_BOOT_BIN) bs=$(U_BOOT_BIN_SIZE) seek=$(U_BOOT_OFFSET)B count=1 of=$@ conv=notrunc status=none
+	# add u-boot env partition
+	dd if=$(UB_ENV_BIN) bs=$(UB_ENV_BIN_SIZE) seek=$(UB_ENV_OFFSET)B count=1 of=$@ conv=notrunc status=none
 	# add config partition
 	dd if=$(CONFIG_BIN) bs=$(CONFIG_BIN_SIZE) seek=$(CONFIG_OFFSET)B count=1 of=$@ conv=notrunc status=none
 	# add kernel partition
