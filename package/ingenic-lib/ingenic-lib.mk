@@ -56,9 +56,17 @@ else ifeq ($(SOC_FAMILY),t41)
 	SDK_VERSION := 1.2.6
 endif
 
-SDK_LIB_DIR = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)
+# T32/T33 vendor libs are laid out flat under <libc>/ (no per-GCC-version
+# subdirectory like the older SoCs' uclibc/5.4.0/), so omit SDK_LIBC_VERSION.
+ifneq ($(filter t32 t33,$(SOC_FAMILY)),)
+	SDK_LIB_DIR = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)
+else
+	SDK_LIB_DIR = $(@D)/$(SOC_FAMILY_CAPS)/lib/$(SDK_VERSION)/$(SDK_LIBC_NAME)/$(SDK_LIBC_VERSION)
+endif
 
-ifneq ($(filter t40 t41 a1,$(SOC_FAMILY)),)
+# t32/t33 ship their own libalog under SDK_LIB_DIR; only the older uclibc SoCs
+# fall back to T31's shared libalog.
+ifneq ($(filter t40 t41 a1 t32 t33,$(SOC_FAMILY)),)
 	LIBALOG_FILE = $(SDK_LIB_DIR)/libalog.so
 else
 	ifeq ($(SDK_LIBC_NAME),uclibc)

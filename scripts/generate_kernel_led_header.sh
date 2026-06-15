@@ -10,6 +10,15 @@ fi
 SOURCE="$1"
 TARGET="$2"
 
+# Skip generation when the target SoC layout does not provide the LED header
+# location. Some kernels (e.g. the T32/PRJ007 5.15 tree) use a different SoC
+# directory layout and handle LEDs via device tree, so soc-<family>/chip-<family>
+# /isvp/common does not exist. Mirror the no-op-on-missing behaviour of
+# patch_kernel_leds_board_base.sh rather than failing the build under `set -e`.
+if [ ! -d "$(dirname "$TARGET")" ]; then
+	exit 0
+fi
+
 get_value() {
 	key="$1"
 	if [ ! -f "$SOURCE" ]; then

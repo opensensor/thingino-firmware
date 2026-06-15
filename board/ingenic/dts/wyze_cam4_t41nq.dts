@@ -1001,6 +1001,7 @@
 			bus-width = <0x04>;
 			voltage-ranges = <0x708 0xce4>;
 			non-removable;
+			ingenic,sdio_clk = <0x01>;
 			ingenic,wp-gpios = <0x00>;
 			ingenic,rst-gpios = <0x06 0x0e 0x01 0x00>;
 		};

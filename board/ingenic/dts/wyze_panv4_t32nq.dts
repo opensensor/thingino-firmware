@@ -12,8 +12,14 @@
 		uart0 = "/apb/serial@0x10030000";
 		uart1 = "/apb/serial@0x10031000";
 		uart2 = "/apb/serial@0x10032000";
-		msc0 = "/ahb0/msc@0x13060000";
-		msc1 = "/ahb0/msc@0x13070000";
+		/* 8250_ingenic numbers ttyS* from "serial" aliases; without these the
+		 * lone enabled UART falls to ttyS0. Map serialN so the console UART
+		 * (serial@10031000) is ttyS1, matching uenv serialport=ttyS1. */
+		serial0 = "/apb/serial@0x10030000";
+		serial1 = "/apb/serial@0x10031000";
+		serial2 = "/apb/serial@0x10032000";
+		mmc0 = "/ahb0/msc@0x13060000";
+		mmc1 = "/ahb0/msc@0x13070000";
 		mac0 = "/ahb2/mac@0x134b0000";
 		spi0 = "/apb/spi0@0x10043000";
 		sfc0 = "/ahb2/sfc0@0x13440000";
@@ -89,6 +95,7 @@
 		clock-names = "ext", "rtc_ext";
 		#clock-cells = <0x01>;
 		little-endian;
+		phandle = <0x60>;
 	};
 
 	apb {
@@ -727,10 +734,16 @@
 			compatible = "ingenic,sdhci";
 			reg = <0x13060000 0x10000>;
 			status = "okay";
+			/* PRJ007 cgu: CLK_MUX_MSC0=19, CLK_DIV_MSC0=39, CLK_GATE_MSC0=60 */
+			clocks = <0x60 0x13>, <0x60 0x27>, <0x60 0x3c>;
+			clock-names = "mux_msc0", "div_msc0", "gate_msc0";
 			interrupt-parent = <0x04>;
 			interrupts = <0x25>;
-			pinctrl-names = "default";
+			/* sdhci-ingenic looks up an "active" pinctrl state to power on
+			 * the controller; reuse the function group for both states. */
+			pinctrl-names = "default", "active";
 			pinctrl-0 = <0x10>;
+			pinctrl-1 = <0x10>;
 			cap-mmc-highspeed;
 			max-frequency = <0x17d7840>;
 			bus-width = <0x04>;
@@ -748,10 +761,14 @@
 			compatible = "ingenic,sdhci";
 			reg = <0x13070000 0x10000>;
 			status = "okay";
+			/* PRJ007 cgu: CLK_MUX_MSC1=20, CLK_DIV_MSC1=40, CLK_GATE_MSC1=61 */
+			clocks = <0x60 0x14>, <0x60 0x28>, <0x60 0x3d>;
+			clock-names = "mux_msc1", "div_msc1", "gate_msc1";
 			interrupt-parent = <0x04>;
 			interrupts = <0x24>;
-			pinctrl-names = "default";
+			pinctrl-names = "default", "active";
 			pinctrl-0 = <0x12>;
+			pinctrl-1 = <0x12>;
 			cap-mmc-highspeed;
 			max-frequency = <0x17d7840>;
 			bus-width = <0x04>;

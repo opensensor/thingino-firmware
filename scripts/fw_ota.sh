@@ -199,6 +199,7 @@ REMOTE_FW_FILE="/tmp/fw.bin"
 REMOTE_FW_DIR="/tmp"
 REMOTE_HOST="root@$CAMERA_IP_ADDRESS"
 REMOTE_SCRIPT="/tmp/sup"
+REMOTE_SCRIPT2="/tmp/$(basename "$LOCAL_SCRIPT2")"
 
 SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=2 \
 -o ControlMaster=auto -o ControlPath=/tmp/ssh_mux_%h_%p_%r \
@@ -236,9 +237,9 @@ echo "Firmware compatibility verified."
 upload_sysupgrade() {
 	remote_copy $LOCAL_SCRIPT $REMOTE_HOST:$REMOTE_SCRIPT || \
 		die "Failed to transfer sysupgrade utility"
-	remote_copy $LOCAL_SCRIPT2 $REMOTE_HOST:/sbin/$(basename $LOCAL_SCRIPT2) || \
+	remote_copy $LOCAL_SCRIPT2 $REMOTE_HOST:$REMOTE_SCRIPT2 || \
 		die "Failed to transfer sysupgrade-stage2 utility"
-	remote_run "chmod +x $REMOTE_SCRIPT" || \
+	remote_run "chmod +x $REMOTE_SCRIPT $REMOTE_SCRIPT2" || \
 		die "Failed to set execute permissions on sysupgrade utility"
 	echo "Sysupgrade utility installed successfully."
 }
@@ -270,7 +271,7 @@ pre_flash_uptime=$(remote_uptime_seconds)
 [ -z "$pre_flash_uptime" ] && die "Failed to read device uptime before flashing"
 
 ota_log=$(mktemp)
-remote_run "$REMOTE_SCRIPT -x $REMOTE_FW_FILE" 2>&1 | tee /dev/tty | tee "$ota_log" >/dev/null
+remote_run "SYSUPGRADE_STAGE2_PATH=$REMOTE_SCRIPT2 $REMOTE_SCRIPT -x $REMOTE_FW_FILE" 2>&1 | tee /dev/tty | tee "$ota_log" >/dev/null
 ota_status=${PIPESTATUS[0]}
 
 if grep -q "Rebooting" "$ota_log"; then

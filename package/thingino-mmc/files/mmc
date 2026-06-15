@@ -5,9 +5,66 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-endpoint="/sys/devices/platform/jzmmc_v1.2.$1/present"
-if [ ! -f "$endpoint" ]; then
-	echo "No endpoint $endpoint" >&2
+port="$1"
+case "$port" in
+	*[!0-9]*)
+		echo "Invalid MMC port: $port" >&2
+		exit 1
+		;;
+esac
+
+get_sdhci_addr() {
+	case "$1" in
+		0) echo "13060000" ;;
+		1) echo "13070000" ;;
+		2) echo "13080000" ;;
+	esac
+}
+
+find_endpoint() {
+	local addr base candidate port
+
+	port="$1"
+
+	for candidate in \
+		"/sys/devices/platform/jzmmc_v1.2.$port/present" \
+		"/sys/bus/platform/devices/jzmmc_v1.2.$port/present" \
+		"/sys/devices/platform/ingenic,sdhci.$port/present" \
+		"/sys/bus/platform/devices/ingenic,sdhci.$port/present"; do
+		[ -f "$candidate" ] && echo "$candidate" && return 0
+	done
+
+	addr=$(get_sdhci_addr "$port")
+	[ -n "$addr" ] || return 1
+
+	for candidate in \
+		"/sys/devices/platform/ahb0/$addr.msc/present" \
+		"/sys/devices/platform/ahb0/msc@0x$addr/present" \
+		/sys/devices/platform/*/"$addr".msc/present \
+		/sys/devices/platform/*/msc@0x"$addr"/present \
+		/sys/bus/platform/devices/"$addr".msc/present \
+		/sys/bus/platform/devices/msc@0x"$addr"/present \
+		/sys/bus/platform/devices/*"$addr"*/present; do
+		[ -f "$candidate" ] && echo "$candidate" && return 0
+	done
+
+	for base in /sys/devices/platform /sys/bus/platform/devices; do
+		[ -d "$base" ] || continue
+		for candidate in $(find "$base" -maxdepth 5 -type f -name present 2>/dev/null); do
+			case "$candidate" in
+				*"$addr"*)
+					echo "$candidate"
+					return 0
+					;;
+			esac
+		done
+	done
+
+	return 1
+}
+
+if ! endpoint=$(find_endpoint "$port"); then
+	echo "No MMC present endpoint for port $port" >&2
 	exit 1
 fi
 
@@ -17,6 +74,11 @@ if [ "$2" = "-r" ]; then
 else
 	action="INSERT"
 fi
-echo "$action" >"$endpoint"
+
+echo "Use MMC endpoint $endpoint"
+if ! echo "$action" >"$endpoint"; then
+	echo "Failed to send $action to $endpoint" >&2
+	exit 1
+fi
 
 exit 0

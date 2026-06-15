@@ -55,6 +55,8 @@ ifeq ($(KERNEL_VERSION),)
 		KERNEL_VERSION := 4.4.94
 	else ifeq ($(SOC_FAMILY),a1)
 		KERNEL_VERSION := 4.4.94
+	else ifeq ($(SOC_FAMILY),t32)
+		KERNEL_VERSION := 5.15.170
 	else
 		KERNEL_VERSION := 3.10.14
 	endif
@@ -80,6 +82,12 @@ else ifeq ($(SOC_FAMILY),t41)
 	endif
 else ifeq ($(SOC_FAMILY),t40)
 	KERNEL_BRANCH := ingenic-t40
+else ifeq ($(SOC_FAMILY),t32)
+	# T32 uses the curated ingenic-t32 branch (Linux 5.15.170).
+	# NOTE: this branch still uses codenamed SoC dirs/symbols (soc-PRJ007 /
+	# CONFIG_SOC_PRJ007), which do not match thingino's SOC_FAMILY=t32 path
+	# conventions used by the KOPT LED step. See t32.generic.config notes.
+	KERNEL_BRANCH := ingenic-t32
 else ifeq ($(SOC_FAMILY),t31)
 	ifeq ($(KERNEL_VERSION),4.4.94)
 		KERNEL_BRANCH := ingenic-t31-4.4.94

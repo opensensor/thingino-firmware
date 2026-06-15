@@ -15,6 +15,7 @@ PAD="\n\t\t\t    "
 workdir="/tmp/sysupgrade"
 stage1app="sysupgrade"
 stage2app="sysupgrade-stage2"
+stage2path="${SYSUPGRADE_STAGE2_PATH:-/sbin/$stage2app}"
 
 SD_CARD_ROOT="/mnt/mmcblk0p1"
 
@@ -326,8 +327,8 @@ update_self() {
 	GH_DL_URL="https://raw.githubusercontent.com/themactep/thingino-firmware/refs/heads/stable/package/thingino-sysupgrade/files/"
 	download "$GH_DL_URL$stage1app" "$workdir/$stage1app"
 	chmod +x "$workdir/$stage1app"
-	download "$GH_DL_URL$stage2app" "/sbin/$stage2app"
-	chmod +x "/sbin/$stage2app"
+	download "$GH_DL_URL$stage2app" "$stage2path"
+	chmod +x "$stage2path"
 }
 
 dl_dir="/tmp"
@@ -509,7 +510,7 @@ fi
 
 echo_c 112 "\nPrepare working directory"
 clone_app /bin/busybox
-clone_app /sbin/$stage2app
+clone_app "$stage2path" "$stage2app"
 for a in $bbapplets; do expand_bb $a; done
 
 echo_c 112 "\nPartitions"
