@@ -1,0 +1,2 @@
+bootdelay=0
+serialport=ttyS1
