@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Matt Davis <matteius@gmail.com>
+Date: Thu, 18 Jun 2026 02:40:00 +0000
+Subject: [PATCH] package/libnl: avoid autoreconf after local patches
+
+The external libnl patches update Makefile.am and configure.ac alongside
+their generated Makefile.in and configure outputs.
+
+Without refreshing the generated-file mtimes after patching, make treats the
+autotools outputs as stale and tries to run aclocal-1.17 during the target
+build. Host automake may not provide that exact version, and autoreconf is not
+needed because the generated files are already patched.
+
+Touch the generated autotools files after patching so the normal build uses
+the checked-in/generated outputs instead of invoking host autotools.
+
+Signed-off-by: Matt Davis <matteius@gmail.com>
+---
+ package/libnl/libnl.mk | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/package/libnl/libnl.mk b/package/libnl/libnl.mk
+index 2dcb594141..367e3a7a12 100644
+--- a/package/libnl/libnl.mk
++++ b/package/libnl/libnl.mk
+@@ -15,6 +15,14 @@ LIBNL_DEPENDENCIES = host-bison host-flex host-pkgconf
+ 
+ HOST_LIBNL_DEPENDENCIES = host-bison host-flex host-pkgconf
+ 
++define LIBNL_AVOID_AUTORECONF_HOOK
++	touch $(@D)/aclocal.m4
++	touch $(@D)/configure
++	touch $(@D)/Makefile.in
++endef
++LIBNL_PRE_CONFIGURE_HOOKS += LIBNL_AVOID_AUTORECONF_HOOK
++HOST_LIBNL_PRE_CONFIGURE_HOOKS += LIBNL_AVOID_AUTORECONF_HOOK
++
+ ifeq ($(BR2_PACKAGE_LIBNL_TOOLS),y)
+ LIBNL_CONF_OPTS += --enable-cli
+ else
+-- 
+2.50.0
+

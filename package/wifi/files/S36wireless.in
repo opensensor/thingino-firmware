@@ -240,6 +240,54 @@ apply_wlan_sequence() {
 	EOF
 }
 
+module_is_loaded() {
+	local module="$1" loaded
+
+	while read -r loaded _; do
+		[ "$loaded" = "$module" ] && return 0
+	done < /proc/modules
+
+	return 1
+}
+
+load_wlan_dependency() {
+	local module="$1" path="$2"
+
+	if module_is_loaded "$module"; then
+		return 0
+	fi
+
+	if [ ! -f "$path" ]; then
+		return 0
+	fi
+
+	echo "Loading $module dependency"
+	insmod "$path"
+}
+
+load_atbm6162s_dependencies() {
+	local modules_dir
+
+	[ "atbm6162s" = "$WLAN_MODULE_NAME" ] || return 0
+
+	modules_dir="/lib/modules/$(uname -r)"
+	load_wlan_dependency firmware_class "$modules_dir/kernel/drivers/base/firmware_loader/firmware_class.ko" || return 1
+	load_wlan_dependency libarc4 "$modules_dir/kernel/lib/crypto/libarc4.ko" || return 1
+	load_wlan_dependency cfg80211 "$modules_dir/kernel/net/wireless/cfg80211.ko" || return 1
+	load_wlan_dependency mac80211 "$modules_dir/kernel/net/mac80211/mac80211.ko" || return 1
+}
+
+load_wlan_module() {
+	echo "Loading $WLAN_MODULE_NAME module with parameters $WLAN_MODULE_OPTS"
+
+	if [ "atbm6162s" = "$WLAN_MODULE_NAME" ]; then
+		modprobe $WLAN_MODULE_NAME $WLAN_MODULE_OPTS &
+		return 0
+	fi
+
+	modprobe $WLAN_MODULE_NAME $WLAN_MODULE_OPTS
+}
+
 start() {
 	echo -c 15 "Starting wireless interface"
 
@@ -296,8 +344,12 @@ start() {
 		@else@
 		echo "Skip GPIO setup for @SOC_MODEL@"
 		@endif@
-		echo "Send INSERT to MMC1"
-		mmc 1
+		if [ "atbm6162s" = "$WLAN_MODULE_NAME" ]; then
+			echo "ATBM6162S driver owns MMC insert"
+		else
+			echo "Send INSERT to MMC1"
+			mmc 1
+		fi
 		@endif@
 		@endif@
 	fi
@@ -314,11 +366,15 @@ start() {
 	fi
 	@endif@
 
-	if grep -q "^$WLAN_MODULE_NAME\b" /proc/modules; then
+	if ! load_atbm6162s_dependencies; then
+		echo "Failed to load $WLAN_MODULE_NAME dependencies" >&2
+		exit 1
+	fi
+
+	if module_is_loaded "$WLAN_MODULE_NAME"; then
 		echo "Module $WLAN_MODULE_NAME is already loaded"
 	else
-		echo "Loading $WLAN_MODULE_NAME module with parameters $WLAN_MODULE_OPTS"
-		modprobe $WLAN_MODULE_NAME $WLAN_MODULE_OPTS
+		load_wlan_module
 	fi
 
 	m=50 # limit to 5 seconds
