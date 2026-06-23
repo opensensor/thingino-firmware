@@ -39,12 +39,43 @@ static const char *half_sequence[] = {"1000", "1100", "0100", "0110",
 	"0010", "0011", "0001", "1001"};
 
 static const struct candidate known_candidates[] = {
-	{"t23 y4/cp80x0 pan guess", "61 62 63 49"},
-	{"t23 y4/cp80x0 tilt guess", "59 52 53 64"},
-	{"d1/q5/q7 pan guess", "49 63 62 61"},
-	{"d1/q5/q7 tilt guess", "52 53 64 59"},
-	{"w7/y4-t31 pan guess", "49 61 62 63"},
-	{"w7/y4-t31 tilt guess", "52 59 64 53"},
+	{"repo common: d1/q5/q7 pan", "49 63 62 61"},
+	{"repo common: d1/q5/q7 tilt", "52 53 64 59"},
+	{"repo common: jooan pan", "53 52 54 51"},
+	{"repo common: jooan tilt", "51 54 52 53"},
+	{"repo common: laview/g6 pan", "64 53 52 54"},
+	{"repo common: laview/g6 tilt", "51 63 62 61"},
+	{"repo common: y4/cp80x0 pan", "61 62 63 49"},
+	{"repo common: y4/cp80x0 tilt", "59 52 53 64"},
+	{"repo common: galayou g2 pan", "54 52 53 64"},
+	{"repo common: galayou g2 tilt", "61 62 63 51"},
+	{"repo common: wuuk pan", "61 62 63 51"},
+	{"repo common: wuuk tilt", "54 52 53 64"},
+	{"repo common: w7/y4-t31 pan", "49 61 62 63"},
+	{"repo common: w7/y4-t31 tilt", "52 59 64 53"},
+	{"repo common: aosu/dekco pan", "63 62 61 51"},
+	{"repo common: aosu/dekco tilt", "54 52 53 41"},
+	{"repo common: vanhua pan", "63 62 61 60"},
+	{"repo common: vanhua tilt", "59 52 53 49"},
+	{"repo common: sonoff pt2 pan", "58 53 52 54"},
+	{"repo common: sonoff pt2 tilt", "63 62 61 51"},
+	{"repo common: zte tilt", "54 53 52 59"},
+	{"repo common: wyze t31 pan", "52 53 57 51"},
+	{"repo common: wyze t31 tilt", "63 62 61 59"},
+	{"repo common: feisda pan", "59 57 64 62"},
+	{"repo common: feisda tilt", "58 49 63 61"},
+	{"repo common: longplus pan", "53 62 61 60"},
+	{"repo common: longplus tilt", "58 57 50 49"},
+	{"repo common: pesita pan", "60 61 62 53"},
+	{"repo common: campan pan", "54 51 49 57"},
+	{"repo common: campan tilt", "63 62 61 60"},
+	{"repo common: lower-bank pan", "7 6 8 10"},
+	{"repo common: lower-bank tilt", "9 11 14 16"},
+	{"repo common: jooan switch17 pan", "14 54 52 53"},
+	{"repo common: jooan switch17 tilt", "53 52 54 14"},
+	{"repo common: high-bank pan", "77 76 75 78"},
+	{"repo common: high-bank alternate", "81 82 51 53"},
+	{"cinnado b6 mould 804 shared phases", "51 54 57 38"},
 };
 
 static int current_pins[4] = {-1, -1, -1, -1};
@@ -54,6 +85,11 @@ static size_t exported_pins_count;
 static int enable_gpio = -1;
 static int enable_value = 1;
 static int enable_exported;
+static int pan_enable_gpio = -1;
+static int tilt_enable_gpio = -1;
+static int pan_enable_exported;
+static int tilt_enable_exported;
+static char axis_arg[16];
 static int invert_gpio;
 static int use_gpio_helper = 1;
 
@@ -65,9 +101,21 @@ static int permute_pins;
 static int pause_between;
 static int scan_known;
 static int pulse_mode;
+static int quad_mode;
+static int pair_mode;
 static int keep_motor_stack;
 static int allow_sdio_pins;
+static int max_span;
+static int max_tests;
+static int tests_run;
+static int tests_seen;
+static int skip_tests;
 static char pins_arg[128];
+static char quad_pins_arg[1024];
+static char quad_range_arg[64];
+static char pair_pins_arg[1024];
+static char pair_range_arg[64];
+static char candidate_file_arg[256];
 static char pulse_pins_arg[512];
 static char pulse_range_arg[64];
 static char exclude_arg[512];
@@ -81,6 +129,11 @@ static void usage(FILE *stream)
 		"  motor-gpio-scan --pins \"p1 p2 p3 p4\" [options]\n"
 		"  motor-gpio-scan --from-config pan|tilt [options]\n"
 		"  motor-gpio-scan --scan-known [options]\n"
+		"  motor-gpio-scan --quad-range A-B [options]\n"
+		"  motor-gpio-scan --quad-pins \"p1 p2 ...\" [options]\n"
+		"  motor-gpio-scan --candidate-file PATH [options]\n"
+		"  motor-gpio-scan --pair-range A-B [options]\n"
+		"  motor-gpio-scan --pair-pins \"p1 p2 ...\" [options]\n"
 		"  motor-gpio-scan --pulse-range A-B [options]\n"
 		"  motor-gpio-scan --pulse-pins \"p1 p2 ...\" [options]\n"
 		"\n"
@@ -93,10 +146,16 @@ static void usage(FILE *stream)
 		"  --invert               Treat GPIO outputs as active-low\n"
 		"  --permute              Try all 24 phase orders for the supplied pins\n"
 		"  --pause                Wait for Enter between candidates\n"
-		"  --exclude \"p1 p2 ...\" Skip pins during --pulse-range/--pulse-pins\n"
+		"  --exclude \"p1 p2 ...\" Skip pins during generated scans\n"
+		"  --max-span N           Skip quad candidates where max(pin)-min(pin) > N\n"
+		"  --max-tests N          Stop after N motor sweeps/pulses\n"
+		"  --skip-tests N         Skip first N generated tests before driving GPIOs\n"
 		"  --enable-gpio N        Set motor power/enable GPIO before testing\n"
 		"  --enable-value 0|1     Value for --enable-gpio (default: 1)\n"
-		"  --allow-sdio-pins      Allow GPIO40-46/PB08-PB14 pulse tests\n"
+		"  --pan-enable-gpio N    Pan motor enable GPIO for shared-coil tests\n"
+		"  --tilt-enable-gpio N   Tilt motor enable GPIO for shared-coil tests\n"
+		"  --axis pan|tilt        Select active axis when using axis enables\n"
+		"  --allow-sdio-pins      Allow GPIO40-46/PB08-PB14 tests\n"
 		"  --direct-sysfs         Use /sys/class/gpio directly instead of /sbin/gpio\n"
 		"  --keep-motor-stack     Do not stop S59motor/motors-daemon/motor.ko first\n"
 		"  -h, --help             Show this help\n"
@@ -105,6 +164,10 @@ static void usage(FILE *stream)
 		"  motor-gpio-scan --pins \"61 62 63 49\" --steps 96\n"
 		"  motor-gpio-scan --pins \"61 62 63 49\" --permute --steps 32 --pause\n"
 		"  motor-gpio-scan --scan-known --drive half --steps 48 --pause\n"
+		"  motor-gpio-scan --pins \"51 54 57 38\" --axis pan --pan-enable-gpio 16 --tilt-enable-gpio 17 --drive half\n"
+		"  motor-gpio-scan --quad-range 47-95 --max-span 12 --steps 32 --pause\n"
+		"  motor-gpio-scan --quad-pins \"47 48 51 52 53 54 55 56 59 65 66\" --permute --steps 24 --pause\n"
+		"  motor-gpio-scan --pair-range 47-95 --pulse-ms 150 --pause\n"
 		"  motor-gpio-scan --pulse-range 32-95 --exclude \"49 50 58 60 61 62 63 64\" --pause\n");
 }
 
@@ -118,6 +181,19 @@ static void die_errno(const char *message)
 {
 	fprintf(stderr, "ERROR: %s: %s\n", message, strerror(errno));
 	exit(EXIT_FAILURE);
+}
+
+static int claim_test_slot(void)
+{
+	if (max_tests > 0 && tests_run >= max_tests)
+		return 1;
+
+	tests_seen++;
+	if (skip_tests > 0 && tests_seen <= skip_tests)
+		return 2;
+
+	tests_run++;
+	return 0;
 }
 
 static int parse_int(const char *value, int min, int max, int *out)
@@ -278,6 +354,26 @@ static void disable_enable_gpio(void)
 	}
 }
 
+static void disable_axis_enable_gpios(void)
+{
+	char value[32];
+	int inactive = enable_value ? 0 : 1;
+
+	if (pan_enable_gpio >= 0)
+		raw_write_gpio(pan_enable_gpio, inactive, 0);
+	if (tilt_enable_gpio >= 0)
+		raw_write_gpio(tilt_enable_gpio, inactive, 0);
+
+	if (pan_enable_exported) {
+		snprintf(value, sizeof(value), "%d", pan_enable_gpio);
+		sysfs_write(GPIO_BASE "/unexport", value, 0);
+	}
+	if (tilt_enable_exported) {
+		snprintf(value, sizeof(value), "%d", tilt_enable_gpio);
+		sysfs_write(GPIO_BASE "/unexport", value, 0);
+	}
+}
+
 static void release_exported_gpios(void)
 {
 	size_t i;
@@ -295,6 +391,7 @@ static void release_exported_gpios(void)
 static void cleanup(void)
 {
 	all_off();
+	disable_axis_enable_gpios();
 	disable_enable_gpio();
 	release_exported_gpios();
 }
@@ -334,6 +431,67 @@ static void setup_enable_gpio(void)
 	gpio_path(path, sizeof(path), enable_gpio, "direction");
 	sysfs_write(path, "out", 1);
 	raw_write_gpio(enable_gpio, enable_value, 1);
+}
+
+static void setup_one_axis_enable_gpio(int pin, int *exported)
+{
+	char path[128];
+	char value[32];
+
+	if (pin < 0)
+		return;
+
+	if (use_gpio_helper)
+		return;
+
+	snprintf(path, sizeof(path), GPIO_BASE "/gpio%d", pin);
+	if (!path_exists(path)) {
+		snprintf(value, sizeof(value), "%d", pin);
+		sysfs_write(GPIO_BASE "/export", value, 1);
+		*exported = 1;
+	}
+
+	if (path_exists(GPIO_CLAIM_PATH)) {
+		snprintf(value, sizeof(value), "%d", pin);
+		sysfs_write(GPIO_CLAIM_PATH, value, 0);
+	}
+
+	gpio_path(path, sizeof(path), pin, "direction");
+	sysfs_write(path, "out", 1);
+}
+
+static void setup_axis_enable_gpios(void)
+{
+	int pan_active;
+	int active = enable_value;
+	int inactive = enable_value ? 0 : 1;
+
+	if (pan_enable_gpio < 0 && tilt_enable_gpio < 0)
+		return;
+
+	if (strcmp(axis_arg, "pan") == 0) {
+		pan_active = 1;
+	} else if (strcmp(axis_arg, "tilt") == 0) {
+		pan_active = 0;
+	} else {
+		die("--axis pan|tilt is required with --pan-enable-gpio/--tilt-enable-gpio");
+	}
+
+	if (use_gpio_helper) {
+		if (pan_enable_gpio >= 0)
+			raw_write_gpio(pan_enable_gpio, pan_active ? active : inactive, 1);
+		if (tilt_enable_gpio >= 0)
+			raw_write_gpio(tilt_enable_gpio, pan_active ? inactive : active, 1);
+		return;
+	}
+
+	setup_one_axis_enable_gpio(pan_enable_gpio, &pan_enable_exported);
+	setup_one_axis_enable_gpio(tilt_enable_gpio, &tilt_enable_exported);
+
+	if (pan_enable_gpio >= 0)
+		raw_write_gpio(pan_enable_gpio, pan_active ? active : inactive, 1);
+	if (tilt_enable_gpio >= 0)
+		raw_write_gpio(tilt_enable_gpio, pan_active ? inactive : active, 1);
 }
 
 static void trim(char *text)
@@ -423,6 +581,35 @@ static int parse_range(const char *text, int *start, int *end)
 	return 0;
 }
 
+static int pin_is_in_list(const int *pins, size_t count, int pin)
+{
+	size_t i;
+
+	for (i = 0; i < count; i++) {
+		if (pins[i] == pin)
+			return 1;
+	}
+
+	return 0;
+}
+
+static void sort_pins(int *pins, size_t count)
+{
+	size_t i;
+
+	for (i = 1; i < count; i++) {
+		int value = pins[i];
+		size_t j = i;
+
+		while (j > 0 && pins[j - 1] > value) {
+			pins[j] = pins[j - 1];
+			j--;
+		}
+
+		pins[j] = value;
+	}
+}
+
 static int pin_is_excluded(int pin)
 {
 	int pins[128];
@@ -441,10 +628,55 @@ static int pin_is_excluded(int pin)
 	}
 
 check_builtin_excludes:
-	if (pulse_mode && !allow_sdio_pins && pin >= 40 && pin <= 46)
+	if (!allow_sdio_pins && pin >= 40 && pin <= 46)
 		return 1;
 
 	return 0;
+}
+
+static void append_unique_pin(int *pins, size_t max_pins, size_t *count, int pin)
+{
+	if (*count >= max_pins)
+		die("too many GPIO pins in scan set");
+	if (pin_is_in_list(pins, *count, pin))
+		return;
+	if (pin_is_excluded(pin))
+		return;
+
+	pins[(*count)++] = pin;
+}
+
+static void append_pin_range(const char *range_arg, int *pins, size_t max_pins,
+			     size_t *count)
+{
+	int start;
+	int end;
+	int step;
+	int pin;
+
+	if (parse_range(range_arg, &start, &end) < 0)
+		die("range argument expects A-B");
+
+	step = start <= end ? 1 : -1;
+	for (pin = start;; pin += step) {
+		append_unique_pin(pins, max_pins, count, pin);
+		if (pin == end)
+			break;
+	}
+}
+
+static void append_pin_list_filtered(const char *text, int *pins, size_t max_pins,
+				     size_t *count)
+{
+	int parsed[256];
+	size_t parsed_count = 0;
+	size_t i;
+
+	if (append_pin_tokens(text, parsed, ARRAY_SIZE(parsed), &parsed_count) < 0)
+		die("pin list expects numeric GPIO pins");
+
+	for (i = 0; i < parsed_count; i++)
+		append_unique_pin(pins, max_pins, count, parsed[i]);
 }
 
 static void stop_motor_stack(void)
@@ -454,13 +686,16 @@ static void stop_motor_stack(void)
 	if (keep_motor_stack)
 		return;
 
-	rc = system("/etc/init.d/S59motor stop >/dev/null 2>&1");
-	if (rc == -1)
-		fprintf(stderr, "warning: could not run S59motor stop\n");
-
-	rc = system("killall motors-daemon >/dev/null 2>&1");
+	rc = system("killall motors-daemon >/dev/null 2>&1 || true");
 	if (rc == -1)
 		fprintf(stderr, "warning: could not run killall motors-daemon\n");
+
+	rc = system("for i in 1 2 3; do pidof motors-daemon >/dev/null 2>&1 || exit 0; sleep 1; done; exit 1");
+	if (rc != 0) {
+		fprintf(stderr,
+			"warning: motors-daemon is still running; not unloading motor.ko\n");
+		return;
+	}
 
 	rc = system("rmmod motor >/dev/null 2>&1");
 	if (rc != 0)
@@ -547,6 +782,8 @@ static const char *drive_name(void)
 	return "unknown";
 }
 
+static void pause_if_requested(void);
+
 static int apply_pattern(const char *pattern)
 {
 	size_t i;
@@ -565,9 +802,25 @@ static int run_sweep(const char *pin_text, const char *label)
 	const char **sequence;
 	size_t sequence_count;
 	int count = 0;
+	int slot;
+
+	if (max_tests > 0 && tests_run >= max_tests)
+		return 1;
 
 	if (parse_pin_list(pin_text, pins) < 0)
 		die("expected exactly four numeric GPIO pins");
+
+	if (pin_is_excluded(pins[0]) || pin_is_excluded(pins[1]) ||
+	    pin_is_excluded(pins[2]) || pin_is_excluded(pins[3]))
+		return -1;
+
+	if (pins[0] == pins[1] || pins[0] == pins[2] || pins[0] == pins[3] ||
+	    pins[1] == pins[2] || pins[1] == pins[3] || pins[2] == pins[3])
+		return -1;
+
+	slot = claim_test_slot();
+	if (slot != 0)
+		return slot;
 
 	if (prepare_pins(pins) < 0) {
 		fprintf(stderr, "Skipping %s: pins='%d %d %d %d' are not all usable as outputs\n",
@@ -577,8 +830,8 @@ static int run_sweep(const char *pin_text, const char *label)
 	}
 	sequence = get_sequence(&sequence_count);
 
-	printf("Testing %s: pins='%d %d %d %d' api=%s drive=%s steps=%d delay_us=%d invert=%d reverse=%d\n",
-		label, pins[0], pins[1], pins[2], pins[3],
+	printf("[%d] Testing %s: pins='%d %d %d %d' api=%s drive=%s steps=%d delay_us=%d invert=%d reverse=%d\n",
+		tests_seen, label, pins[0], pins[1], pins[2], pins[3],
 		use_gpio_helper ? "gpio-helper" : "direct-sysfs",
 		drive_name(), steps, delay_us, invert_gpio, reverse_sequence);
 	fflush(stdout);
@@ -602,6 +855,68 @@ static int run_sweep(const char *pin_text, const char *label)
 	return 0;
 }
 
+static int run_sweep_pins(const int pins[4], const char *label)
+{
+	char candidate[64];
+
+	snprintf(candidate, sizeof(candidate), "%d %d %d %d",
+		pins[0], pins[1], pins[2], pins[3]);
+	return run_sweep(candidate, label);
+}
+
+static int run_candidate_orders(const int pins[4], const char *base_label)
+{
+	if (!permute_pins) {
+		int rc = run_sweep_pins(pins, base_label);
+
+		if (rc == 0)
+			pause_if_requested();
+		return max_tests > 0 && tests_run >= max_tests;
+	}
+
+	{
+		int idx = 0;
+		size_t a;
+
+		for (a = 0; a < ARRAY_SIZE(current_pins); a++) {
+			size_t b;
+			for (b = 0; b < ARRAY_SIZE(current_pins); b++) {
+				size_t c;
+				if (a == b)
+					continue;
+				for (c = 0; c < ARRAY_SIZE(current_pins); c++) {
+					size_t d;
+					if (a == c || b == c)
+						continue;
+					for (d = 0; d < ARRAY_SIZE(current_pins); d++) {
+						int ordered[4];
+						char label[128];
+						int rc;
+
+						if (a == d || b == d || c == d)
+							continue;
+
+						idx++;
+						ordered[0] = pins[a];
+						ordered[1] = pins[b];
+						ordered[2] = pins[c];
+						ordered[3] = pins[d];
+						snprintf(label, sizeof(label), "%s permutation %d/24",
+							base_label, idx);
+						rc = run_sweep_pins(ordered, label);
+						if (rc == 0)
+							pause_if_requested();
+						if (max_tests > 0 && tests_run >= max_tests)
+							return 1;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
 static void pause_if_requested(void)
 {
 	int ch;
@@ -618,16 +933,26 @@ static void pause_if_requested(void)
 
 static int pulse_pin(int pin)
 {
+	int slot;
+
 	if (pin_is_excluded(pin)) {
 		printf("Skipping gpio%d: excluded\n", pin);
 		return 0;
 	}
 
+	if (max_tests > 0 && tests_run >= max_tests)
+		return 1;
+
+	slot = claim_test_slot();
+	if (slot != 0)
+		return slot;
+
 	if (!use_gpio_helper)
 		export_gpio(pin);
 
-	printf("Pulsing gpio%d for %d ms using %s\n",
-		pin, pulse_ms, use_gpio_helper ? "gpio-helper" : "direct-sysfs");
+	printf("[%d] Pulsing gpio%d for %d ms using %s\n",
+		tests_seen, pin, pulse_ms,
+		use_gpio_helper ? "gpio-helper" : "direct-sysfs");
 	fflush(stdout);
 
 	if (raw_write_gpio(pin, off_value(), 0) < 0)
@@ -676,48 +1001,202 @@ static void run_pulse_discovery(void)
 		die("--pulse-range or --pulse-pins is required for pulse mode");
 
 	for (i = 0; i < count; i++) {
-		if (pulse_pin(pins[i]) < 0)
+		int rc = pulse_pin(pins[i]);
+
+		if (rc < 0)
 			fprintf(stderr, "Skipping gpio%d: write failed\n", pins[i]);
-		pause_if_requested();
+		if (rc == 0)
+			pause_if_requested();
+		if (max_tests > 0 && tests_run >= max_tests)
+			return;
 	}
+}
+
+static int pair_pulse(int pin_a, int pin_b)
+{
+	int slot;
+
+	if (pin_is_excluded(pin_a) || pin_is_excluded(pin_b)) {
+		printf("Skipping gpio%d,gpio%d: excluded\n", pin_a, pin_b);
+		return 0;
+	}
+
+	if (pin_a == pin_b)
+		return 0;
+
+	if (max_tests > 0 && tests_run >= max_tests)
+		return 1;
+
+	slot = claim_test_slot();
+	if (slot != 0)
+		return slot;
+
+	if (!use_gpio_helper) {
+		export_gpio(pin_a);
+		export_gpio(pin_b);
+	}
+
+	printf("[%d] Pair pulse gpio%d,gpio%d for %d ms using %s\n",
+		tests_seen, pin_a, pin_b, pulse_ms,
+		use_gpio_helper ? "gpio-helper" : "direct-sysfs");
+	fflush(stdout);
+
+	raw_write_gpio(pin_a, off_value(), 0);
+	raw_write_gpio(pin_b, off_value(), 0);
+	usleep(10000);
+	if (raw_write_gpio(pin_a, map_bit('1'), 0) < 0 ||
+	    raw_write_gpio(pin_b, map_bit('1'), 0) < 0) {
+		raw_write_gpio(pin_a, off_value(), 0);
+		raw_write_gpio(pin_b, off_value(), 0);
+		return -1;
+	}
+	usleep((useconds_t)pulse_ms * 1000);
+	raw_write_gpio(pin_a, off_value(), 0);
+	raw_write_gpio(pin_b, off_value(), 0);
+
+	return 0;
+}
+
+static void build_filtered_pin_set(const char *range_arg, const char *pins_arg,
+				   int *pins, size_t max_pins, size_t *count)
+{
+	*count = 0;
+
+	if (range_arg[0])
+		append_pin_range(range_arg, pins, max_pins, count);
+	if (pins_arg[0])
+		append_pin_list_filtered(pins_arg, pins, max_pins, count);
+
+	sort_pins(pins, *count);
+}
+
+static void print_pin_set(const char *label, const int *pins, size_t count)
+{
+	size_t i;
+
+	printf("%s (%zu pins):", label, count);
+	for (i = 0; i < count; i++)
+		printf(" %d", pins[i]);
+	putchar('\n');
+}
+
+static void run_pair_discovery(void)
+{
+	int pins[256];
+	size_t count = 0;
+	size_t i;
+
+	build_filtered_pin_set(pair_range_arg, pair_pins_arg, pins, ARRAY_SIZE(pins),
+			       &count);
+	if (count < 2)
+		die("--pair-range/--pair-pins produced fewer than two usable pins");
+
+	print_pin_set("Pair scan pins", pins, count);
+
+	for (i = 0; i < count; i++) {
+		size_t j;
+		for (j = i + 1; j < count; j++) {
+			int rc = pair_pulse(pins[i], pins[j]);
+
+			if (rc < 0)
+				fprintf(stderr, "Skipping gpio%d,gpio%d: write failed\n",
+					pins[i], pins[j]);
+			if (rc == 0)
+				pause_if_requested();
+			if (max_tests > 0 && tests_run >= max_tests)
+				return;
+		}
+	}
+}
+
+static void run_quad_discovery(void)
+{
+	int pins[256];
+	size_t count = 0;
+	size_t i;
+
+	build_filtered_pin_set(quad_range_arg, quad_pins_arg, pins, ARRAY_SIZE(pins),
+			       &count);
+	if (count < 4)
+		die("--quad-range/--quad-pins produced fewer than four usable pins");
+
+	print_pin_set("Quad scan pins", pins, count);
+	if (max_span > 0)
+		printf("Skipping candidates with span > %d\n", max_span);
+
+	for (i = 0; i < count; i++) {
+		size_t j;
+		for (j = i + 1; j < count; j++) {
+			size_t k;
+			for (k = j + 1; k < count; k++) {
+				size_t l;
+				for (l = k + 1; l < count; l++) {
+					int candidate[4];
+					char label[96];
+
+					if (max_span > 0 && pins[l] - pins[i] > max_span)
+						continue;
+
+					candidate[0] = pins[i];
+					candidate[1] = pins[j];
+					candidate[2] = pins[k];
+					candidate[3] = pins[l];
+					snprintf(label, sizeof(label), "quad set %d %d %d %d",
+						candidate[0], candidate[1],
+						candidate[2], candidate[3]);
+					if (run_candidate_orders(candidate, label))
+						return;
+				}
+			}
+		}
+	}
+}
+
+static void run_candidate_file(void)
+{
+	FILE *fp;
+	char line[256];
+	int line_no = 0;
+
+	fp = fopen(candidate_file_arg, "r");
+	if (!fp)
+		die_errno(candidate_file_arg);
+
+	while (fgets(line, sizeof(line), fp)) {
+		char *comment;
+		int pins[4];
+		char label[320];
+
+		line_no++;
+		comment = strchr(line, '#');
+		if (comment)
+			*comment = '\0';
+		trim(line);
+		if (!line[0])
+			continue;
+
+		if (parse_pin_list(line, pins) < 0) {
+			fprintf(stderr, "Skipping %s:%d: expected four GPIO pins\n",
+				candidate_file_arg, line_no);
+			continue;
+		}
+
+		snprintf(label, sizeof(label), "%s:%d", candidate_file_arg, line_no);
+		if (run_candidate_orders(pins, label))
+			break;
+	}
+
+	fclose(fp);
 }
 
 static void run_permutations(const char *pin_text)
 {
 	int pins[4];
-	int idx = 0;
-	size_t a;
 
 	if (parse_pin_list(pin_text, pins) < 0)
 		die("expected exactly four numeric GPIO pins");
 
-	for (a = 0; a < ARRAY_SIZE(current_pins); a++) {
-		size_t b;
-		for (b = 0; b < ARRAY_SIZE(current_pins); b++) {
-			size_t c;
-			if (a == b)
-				continue;
-			for (c = 0; c < ARRAY_SIZE(current_pins); c++) {
-				size_t d;
-				if (a == c || b == c)
-					continue;
-				for (d = 0; d < ARRAY_SIZE(current_pins); d++) {
-					char candidate[64];
-					char label[64];
-
-					if (a == d || b == d || c == d)
-						continue;
-
-					idx++;
-					snprintf(candidate, sizeof(candidate), "%d %d %d %d",
-						pins[a], pins[b], pins[c], pins[d]);
-					snprintf(label, sizeof(label), "permutation %d/24", idx);
-					if (run_sweep(candidate, label) == 0)
-						pause_if_requested();
-				}
-			}
-		}
-	}
+	run_candidate_orders(pins, "supplied order");
 }
 
 static void run_known_candidates(void)
@@ -773,6 +1252,31 @@ static void parse_args(int argc, char **argv)
 			pause_between = 1;
 		} else if (strcmp(argv[i], "--scan-known") == 0) {
 			scan_known = 1;
+		} else if (strcmp(argv[i], "--quad-range") == 0) {
+			if (++i >= argc)
+				die("--quad-range requires A-B");
+			snprintf(quad_range_arg, sizeof(quad_range_arg), "%s", argv[i]);
+			quad_mode = 1;
+		} else if (strcmp(argv[i], "--quad-pins") == 0) {
+			if (++i >= argc)
+				die("--quad-pins requires a pin list");
+			snprintf(quad_pins_arg, sizeof(quad_pins_arg), "%s", argv[i]);
+			quad_mode = 1;
+		} else if (strcmp(argv[i], "--candidate-file") == 0) {
+			if (++i >= argc)
+				die("--candidate-file requires a path");
+			snprintf(candidate_file_arg, sizeof(candidate_file_arg), "%s", argv[i]);
+			quad_mode = 1;
+		} else if (strcmp(argv[i], "--pair-range") == 0) {
+			if (++i >= argc)
+				die("--pair-range requires A-B");
+			snprintf(pair_range_arg, sizeof(pair_range_arg), "%s", argv[i]);
+			pair_mode = 1;
+		} else if (strcmp(argv[i], "--pair-pins") == 0) {
+			if (++i >= argc)
+				die("--pair-pins requires a pin list");
+			snprintf(pair_pins_arg, sizeof(pair_pins_arg), "%s", argv[i]);
+			pair_mode = 1;
 		} else if (strcmp(argv[i], "--pulse-range") == 0) {
 			if (++i >= argc)
 				die("--pulse-range requires A-B");
@@ -787,12 +1291,31 @@ static void parse_args(int argc, char **argv)
 			if (++i >= argc)
 				die("--exclude requires a pin list");
 			snprintf(exclude_arg, sizeof(exclude_arg), "%s", argv[i]);
+		} else if (strcmp(argv[i], "--max-span") == 0) {
+			if (++i >= argc || parse_int(argv[i], 0, 255, &max_span) < 0)
+				die("--max-span must be 0..255");
+		} else if (strcmp(argv[i], "--max-tests") == 0) {
+			if (++i >= argc || parse_int(argv[i], 0, 1000000, &max_tests) < 0)
+				die("--max-tests must be 0..1000000");
+		} else if (strcmp(argv[i], "--skip-tests") == 0) {
+			if (++i >= argc || parse_int(argv[i], 0, 1000000, &skip_tests) < 0)
+				die("--skip-tests must be 0..1000000");
 		} else if (strcmp(argv[i], "--enable-gpio") == 0) {
 			if (++i >= argc || parse_int(argv[i], 0, 255, &enable_gpio) < 0)
 				die("--enable-gpio must be a GPIO number");
 		} else if (strcmp(argv[i], "--enable-value") == 0) {
 			if (++i >= argc || parse_int(argv[i], 0, 1, &enable_value) < 0)
 				die("--enable-value must be 0 or 1");
+		} else if (strcmp(argv[i], "--pan-enable-gpio") == 0) {
+			if (++i >= argc || parse_int(argv[i], 0, 255, &pan_enable_gpio) < 0)
+				die("--pan-enable-gpio must be a GPIO number");
+		} else if (strcmp(argv[i], "--tilt-enable-gpio") == 0) {
+			if (++i >= argc || parse_int(argv[i], 0, 255, &tilt_enable_gpio) < 0)
+				die("--tilt-enable-gpio must be a GPIO number");
+		} else if (strcmp(argv[i], "--axis") == 0) {
+			if (++i >= argc)
+				die("--axis requires pan or tilt");
+			snprintf(axis_arg, sizeof(axis_arg), "%s", argv[i]);
 		} else if (strcmp(argv[i], "--allow-sdio-pins") == 0) {
 			allow_sdio_pins = 1;
 		} else if (strcmp(argv[i], "--direct-sysfs") == 0) {
@@ -822,7 +1345,7 @@ int main(int argc, char **argv)
 	if (from_config[0])
 		read_pins_from_config();
 
-	if (!scan_known && !pulse_mode && !pins_arg[0]) {
+	if (!scan_known && !pulse_mode && !quad_mode && !pair_mode && !pins_arg[0]) {
 		usage(stderr);
 		return EXIT_FAILURE;
 	}
@@ -833,9 +1356,16 @@ int main(int argc, char **argv)
 
 	stop_motor_stack();
 	setup_enable_gpio();
+	setup_axis_enable_gpios();
 
 	if (pulse_mode)
 		run_pulse_discovery();
+	else if (pair_mode)
+		run_pair_discovery();
+	else if (candidate_file_arg[0])
+		run_candidate_file();
+	else if (quad_mode)
+		run_quad_discovery();
 	else if (scan_known)
 		run_known_candidates();
 	else if (permute_pins)

@@ -2,10 +2,13 @@
   "motors": {
     "motion_driver": "legacy",
     "gpio_focus": -1,
+    "gpio_enable_invert": false,
     "gpio_invert": false,
     "gpio_pan": "",
+    "gpio_pan_enable": -1,
     "gpio_switch": false,
     "gpio_tilt": "",
+    "gpio_tilt_enable": -1,
     "homing": true,
     "pos_0": "2000,1000",
     "speed_pan": 900,

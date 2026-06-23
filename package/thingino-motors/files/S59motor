@@ -20,10 +20,24 @@ stop_daemon() {
 		start-stop-daemon -K -p "$PIDFILE" -x "$DAEMON"
 		status=$?
 		rm -f "$PIDFILE"
-		return $status
+	else
+		start-stop-daemon -K -x "$DAEMON"
+		status=$?
 	fi
 
-	start-stop-daemon -K -x "$DAEMON"
+	for _ in 1 2 3; do
+		if ! pidof motors-daemon >/dev/null 2>&1; then
+			return $status
+		fi
+		sleep 1
+	done
+
+	if pidof motors-daemon >/dev/null 2>&1; then
+		killall -9 motors-daemon 2>/dev/null || true
+		sleep 1
+	fi
+
+	return $status
 }
 
 MOTORS_CONFIG="/etc/motors.json"
@@ -75,7 +89,10 @@ start() {
 
 	gpio_pan=$(jct $MOTORS_CONFIG get motors.gpio_pan)
 	gpio_tilt=$(jct $MOTORS_CONFIG get motors.gpio_tilt)
+	gpio_pan_enable=$(jct $MOTORS_CONFIG get motors.gpio_pan_enable)
+	gpio_tilt_enable=$(jct $MOTORS_CONFIG get motors.gpio_tilt_enable)
 	gpio_switch=$(jct $MOTORS_CONFIG get motors.gpio_switch)
+	gpio_enable_invert=$(jct $MOTORS_CONFIG get motors.gpio_enable_invert)
 	gpio_invert=$(jct $MOTORS_CONFIG get motors.gpio_invert)
 	steps_pan=$(jct $MOTORS_CONFIG get motors.steps_pan)
 	steps_tilt=$(jct $MOTORS_CONFIG get motors.steps_tilt)
@@ -126,6 +143,18 @@ start() {
 				modprobe_args="$modprobe_args motor_switch_gpio=$gpio_switch"
 			fi
 
+			if echo "$gpio_pan_enable" | grep -qE '^[0-9]+$'; then
+				modprobe_args="$modprobe_args hmotor_enable_gpio=$gpio_pan_enable"
+			fi
+
+			if echo "$gpio_tilt_enable" | grep -qE '^[0-9]+$'; then
+				modprobe_args="$modprobe_args vmotor_enable_gpio=$gpio_tilt_enable"
+			fi
+
+			if [ "true" = "$gpio_enable_invert" ]; then
+				modprobe_args="$modprobe_args invert_enable_polarity=1"
+			fi
+
 			if [ "true" = "$gpio_invert" ]; then
 				modprobe_args="$modprobe_args invert_gpio_dir=1"
 			fi
@@ -159,6 +188,15 @@ stop() {
 	echo -c 15 "Stopping motors"
 
 	stop_daemon
+
+	if pidof motors-daemon >/dev/null 2>&1; then
+		echo "motors-daemon is still running; refusing to unload motor module." >&2
+		exit 1
+	fi
+
+	if ! grep -qE "^motor" /proc/modules; then
+		return
+	fi
 
 	if ! rmmod motor; then
 		echo "Failed to unload motor module." >&2

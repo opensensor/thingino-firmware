@@ -1,0 +1,84 @@
+From 0000000000000000000000000000000000000004 Mon Sep 17 00:00:00 2001
+From: Matt Davis <matteius@gmail.com>
+Date: Tue, 23 Jun 2026 12:00:00 +0000
+Subject: [PATCH] ingenic-sdk: support shared motor phases with axis enables
+
+Some PTZ boards drive both pan and tilt motors through a shared set of
+four stepper phase GPIOs, then select the active motor with separate pan
+and tilt enable GPIOs. Add optional module parameters for those enables
+without changing the existing motor_switch_gpio behavior.
+
+Signed-off-by: Matt Davis <matteius@gmail.com>
+---
+--- a/3.10.14/misc/motor/motor.c
++++ b/3.10.14/misc/motor/motor.c
+@@ -135,0 +136,12 @@
++int hmotor_enable_gpio = -1;
++module_param(hmotor_enable_gpio, int, S_IRUGO);
++MODULE_PARM_DESC(hmotor_enable_gpio, "Pan motor enable GPIO");
++
++int vmotor_enable_gpio = -1;
++module_param(vmotor_enable_gpio, int, S_IRUGO);
++MODULE_PARM_DESC(vmotor_enable_gpio, "Tilt motor enable GPIO");
++
++int invert_enable_polarity = 0;
++module_param(invert_enable_polarity, int, S_IRUGO);
++MODULE_PARM_DESC(invert_enable_polarity, "Invert pan/tilt enable GPIO polarity");
++
+@@ -221,0 +234,29 @@
++static int motor_axis_enable_active(void)
++{
++	return invert_enable_polarity ? 0 : 1;
++}
++
++static int motor_axis_enable_inactive(void)
++{
++	return invert_enable_polarity ? 1 : 0;
++}
++
++static void motor_set_axis_enable(int pan_active)
++{
++	if (hmotor_enable_gpio != -1)
++		gpio_direction_output(hmotor_enable_gpio,
++				      pan_active ? motor_axis_enable_active() : motor_axis_enable_inactive());
++	if (vmotor_enable_gpio != -1)
++		gpio_direction_output(vmotor_enable_gpio,
++				      pan_active ? motor_axis_enable_inactive() : motor_axis_enable_active());
++}
++
++static void motor_disable_axis_enables(void)
++{
++	if (hmotor_enable_gpio != -1)
++		gpio_direction_output(hmotor_enable_gpio, motor_axis_enable_inactive());
++	if (vmotor_enable_gpio != -1)
++		gpio_direction_output(vmotor_enable_gpio, motor_axis_enable_inactive());
++}
++
++// motor_set_direction sets the direction GPIO based on the move_direction value.
+@@ -231,0 +273,3 @@
++
++	if (hmotor_enable_gpio != -1 || vmotor_enable_gpio != -1)
++		motor_set_axis_enable(move_direction == MOTOR_MOVE_RIGHT_UP);
+@@ -259,0 +304,2 @@
++
++	motor_disable_axis_enables();
+@@ -1092,0 +1139,6 @@
++	if (hmotor_enable_gpio != -1)
++		gpio_request(hmotor_enable_gpio, "hmotor_enable_gpio");
++
++	if (vmotor_enable_gpio != -1)
++		gpio_request(vmotor_enable_gpio, "vmotor_enable_gpio");
++
+@@ -1194,0 +1247,6 @@
++		if (i == 0) {
++			if (hmotor_enable_gpio != -1)
++				gpio_free(hmotor_enable_gpio);
++			if (vmotor_enable_gpio != -1)
++				gpio_free(vmotor_enable_gpio);
++		}
+@@ -1237,0 +1296,5 @@
++	if (hmotor_enable_gpio != -1)
++		gpio_free(hmotor_enable_gpio);
++	if (vmotor_enable_gpio != -1)
++		gpio_free(vmotor_enable_gpio);
++
