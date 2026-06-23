@@ -11,9 +11,10 @@
 #  - Stock firmware tag says "OS02G10_6461_S" and loads atbm6461_wifi_sdio.ko.
 #  - Stock user tag confirms Cinnado B6 product metadata and PTZ:
 #      product_name=B6; [HW] ptz=1; flt=1; [PTZ] hstep=510; vstep=132; speed=500
-#  - Motor phase GPIOs are not exposed in the rootfs/kernel strings. Motors are
-#    enabled with the best available guess from the AJCloud T-CP8040LF/Cinnado
-#    PTZ family because the stock user tag reports mould=804. Verify on hardware.
+#  - PTZ is not wired like the usual Thingino direct-GPIO stepper cameras. A
+#    GPIO scan of the normal T23 PTZ ranges did not move the motors, and stock
+#    ajcloud forwards PTZ requests as device_ptz_action over the vendor MQ.
+#    Leave BR2_THINGINO_MOTORS disabled until that control path is implemented.
 #  - GPIO hints from stock firmware: phwi0=/sys/class/gpio/gpio57/value,
 #    phwi1=/sys/class/gpio/gpio38/value, phwi2=/sys/class/gpio/gpio16/value;
 #    upgrade scripts drive LEDs on GPIO49/GPIO50.
@@ -31,7 +32,6 @@ BR2_SENSOR_1_NAME="os02g10"
 BR2_INGENIC_SOC_MODEL="t23zn"
 BR2_THINGINO_AUDIO=y
 BR2_THINGINO_AUDIO_GPIO=63
-BR2_THINGINO_MOTORS=y
 BR2_THINGINO_RMEM_MB=18
 BR2_THINGINO_SDCARD=y
 FLASH_SIZE_MB=16
