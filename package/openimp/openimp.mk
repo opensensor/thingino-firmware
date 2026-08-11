@@ -7,7 +7,7 @@
 OPENIMP_SITE_METHOD = git
 OPENIMP_SITE = https://github.com/opensensor/openimp
 OPENIMP_SITE_BRANCH = main
-OPENIMP_VERSION = d64b80f8b35e5946d7856d6decffc9a1be579b91
+OPENIMP_VERSION = 759d573c93cfb77926c8f584e12b8156544dc8d4
 
 # Upstream describes OpenIMP as MIT but does not currently ship a top-level
 # license file for legal-info to collect.
@@ -39,6 +39,7 @@ endif
 
 define OPENIMP_BUILD_CMDS
 	$(TARGET_MAKE_ENV) \
+		LC_ALL=C \
 		THINGINO_DIR=$(BR2_EXTERNAL_THINGINO_PATH) \
 		TOOLCHAIN_PREFIX=$(OPENIMP_TOOLCHAIN_PREFIX) \
 		T31_OUTPUT_DIR=$(OPENIMP_OUTPUT_DIR) \
