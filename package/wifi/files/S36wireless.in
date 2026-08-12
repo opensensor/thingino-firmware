@@ -279,7 +279,9 @@ start() {
 	@if WIFI_MODULE_IS_SDIO@
 	echo "$WLAN_MODULE_NAME is an SDIO module"
 
-	if [ -d /proc/jz/mdio ]; then
+	if [ "$kernel_version" != "3.10" ] && [ "$kernel_version" != "4.4" ]; then
+		echo "SDIO pinmux and discovery are managed by device tree"
+	elif [ -d /proc/jz/mdio ]; then
 		echo "GMAC is enabled, disabling MSC1..."
 	else
 		@if WIFI_SDIO_UNSUPPORTED@

@@ -172,6 +172,13 @@ load_module() {
 start() {
 	echo -c 15 "Initializing MMC"
 
+	case "$(uname -r)" in
+		7.*)
+			echo "SD/MMC pinmux, power sequencing, and discovery are managed by device tree"
+			return 0
+			;;
+	esac
+
 	gpio_mmc_cd=$(jct "$MMC_CONFIG_JSON" get "gpio.mmc_cd")
 	MMC_PARAM="cd_gpio_pin=${gpio_mmc_cd:-59}"
 	load_module

@@ -21,7 +21,7 @@ endef
 define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_FLOODLIGHT
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/modules.d
 	echo ch341 >> $(TARGET_DIR)/etc/modules.d/accessory
-	echo snd-usb-audio >> $(TARGET_DIR)/etc/modules.d/accessory
+	echo snd-usb-audio >> $(TARGET_DIR)/etc/modules.d/accessory;
 endef
 
 define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_SPOTLIGHT
@@ -29,7 +29,7 @@ define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_SPOTLIGHT
 		$(TARGET_DIR)/usr/sbin/spotlight_ctl
 
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/modules.d
-	echo ch341 >> $(TARGET_DIR)/etc/modules.d/accessory
+	echo ch341 >> $(TARGET_DIR)/etc/modules.d/accessory;
 endef
 
 define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_CAR
@@ -37,8 +37,15 @@ define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_CAR
 		$(TARGET_DIR)/usr/sbin/car_control
 
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/modules.d
-	echo cp210x >> $(TARGET_DIR)/etc/modules.d/accessory
+	echo cp210x >> $(TARGET_DIR)/etc/modules.d/accessory;
 endef
+
+define WYZE_ACCESSORY_INSTALL_TARGET_CMDS_INIT
+	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/modules.d
+	: > $(TARGET_DIR)/etc/modules.d/accessory;
+endef
+
+WYZE_ACCESSORY_INSTALL_TARGET_CMDS = $(WYZE_ACCESSORY_INSTALL_TARGET_CMDS_INIT)
 
 define WYZE_ACCESSORY_LINUX_CONFIG_FIXUPS_FLOODLIGHT
 	$(call KCONFIG_SET_OPT,CONFIG_USB_SERIAL,m)
@@ -78,9 +85,5 @@ ifeq ($(BR2_PACKAGE_WYZE_ACCESSORY_DOORBELL_CTRL),y)
 	WYZE_ACCESSORY_INSTALL_TARGET_CMDS += $(WYZE_ACCESSORY_INSTALL_TARGET_CMDS_DOORBELL_CTRL)
 	WYZE_ACCESSORY_TARGET_FINALIZE_HOOKS += WYZE_ACCESSORY_INSTALL_DOORBELL_BUTTON_CONF
 endif
-
-define WYZE_ACCESSORY_INSTALL_CMDS
-	$(WYZE_ACCESSORY_INSTALL_TARGET_CMDS)
-endef
 
 $(eval $(generic-package))
