@@ -80,7 +80,7 @@ detach_and_flash() {
 		x=0
 		times=""
 		while :; do
-			x=$((x+1))
+			x=$((x + 1))
 			if flash_firmware; then
 				echo "=== Flash completed successfully at $(date) ==="
 				go_reboot
@@ -119,7 +119,7 @@ go_reboot() {
 	sleep 5
 	sync
 	if [ -w /proc/jz/reset/reset ]; then
-		echo wdt > /proc/jz/reset/reset
+		echo wdt >/proc/jz/reset/reset
 	fi
 	sleep 2
 	reboot -f
@@ -127,6 +127,10 @@ go_reboot() {
 
 [ -z "$1" ] && die "Firmware file is not set."
 [ -z "$2" ] && die "Target device is not set."
+
+if grep -q '"boot"$' /proc/mtd && grep -q '"ubi"$' /proc/mtd; then
+	die "Refusing NOR flash_eraseall/flashcp stage on SPI-NAND."
+fi
 
 fw_file="$1"
 mtd_dev="/dev/$2"
