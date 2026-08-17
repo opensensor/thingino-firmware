@@ -14,7 +14,8 @@ define THINGINO_RAPTOR_PATCH_CONF
 		sed -i "/^\[$$1\]/,/^\[/{s|^[# ]*$$2 = .*|$$2 = $$3|;}" "$$CONF" || true; \
 	}; \
 	\
-	if [ "$(BR2_PACKAGE_THINGINO_ISP_OPEN):$(BR2_PACKAGE_OPENIMP):$(SOC_FAMILY)" = "y:y:t41" ]; then \
+	if [ "$(BR2_PACKAGE_THINGINO_ISP_OPEN):$(BR2_PACKAGE_OPENIMP)" = "y:y" ] && \
+		[ "$(SOC_FAMILY)" = "t31" -o "$(SOC_FAMILY)" = "t41" ]; then \
 		rset system video_backend v4l2; \
 		rset system video_device /dev/video0; \
 	fi; \
