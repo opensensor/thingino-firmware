@@ -30,5 +30,19 @@ config BR2_PACKAGE_OPEN_TX_ISP
 
 	  If unsure, say N.
 
+config BR2_PACKAGE_OPEN_TX_ISP_V4L2
+	bool "V4L2 capture adapter"
+	depends on BR2_PACKAGE_OPEN_TX_ISP
+	depends on BR2_SOC_FAMILY = "t31" || BR2_SOC_FAMILY = "t41"
+	default y
+	help
+	  Build the Open TX-ISP V4L2 capture adapter and enable the kernel
+	  V4L2 and DMA-BUF facilities it needs. This provides /dev/video0
+	  for streamers that support direct V4L2 capture.
+
+	  Disable this to keep only the legacy Ingenic IMP ABI. OpenIMP and
+	  proprietary libimp consumers can still use the open driver, and
+	  streamers may fall back when /dev/video0 is absent.
+
 comment "open-tx-isp needs a T23 Linux 3.10, T31 Linux 3.10/7.1, or T40/T41 Linux 4.4 camera"
 	depends on !BR2_PACKAGE_OPEN_TX_ISP_SUPPORTED
