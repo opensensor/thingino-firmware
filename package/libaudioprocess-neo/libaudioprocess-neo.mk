@@ -5,8 +5,8 @@
 ################################################################################
 
 LIBAUDIOPROCESS_NEO_SITE_METHOD = git
-LIBAUDIOPROCESS_NEO_SITE = https://github.com/gtxaspec/libaudioProcess-neo
-LIBAUDIOPROCESS_NEO_SITE_BRANCH = main
+LIBAUDIOPROCESS_NEO_SITE = https://github.com/matteius/libaudioProcess-neo
+LIBAUDIOPROCESS_NEO_SITE_BRANCH = feature/music-video-noise-suppression
 LIBAUDIOPROCESS_NEO_VERSION = 475278e2b88c706f3d07c40c2a60d5f9aee93da4
 LIBAUDIOPROCESS_NEO_INSTALL_STAGING = YES
 
