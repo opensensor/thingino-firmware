@@ -1,0 +1,25 @@
+From: Matt Davis <matteius@gmail.com>
+Subject: [PATCH] media: add Thingino DMA-BUF selector
+
+DMA_SHARED_BUFFER is intentionally hidden because in-tree users select it.
+Thingino also builds out-of-tree capture drivers, so provide a visible switch
+without pulling in an unrelated videobuf2 allocator.
+
+Signed-off-by: Matt Davis <matteius@gmail.com>
+---
+ drivers/media/v4l2-core/Kconfig | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/media/v4l2-core/Kconfig b/drivers/media/v4l2-core/Kconfig
+--- a/drivers/media/v4l2-core/Kconfig
++++ b/drivers/media/v4l2-core/Kconfig
+@@ -11,1 +11,9 @@
++config THINGINO_DMA_SHARED_BUFFER
++	bool "DMA-BUF support for external capture drivers"
++	depends on VIDEO_V4L2 && HAS_DMA
++	select DMA_SHARED_BUFFER
++	help
++	  Enable DMA-BUF export for capture drivers built outside the kernel
++	  tree without selecting an unused in-tree video driver.
++
+ config VIDEO_ADV_DEBUG
