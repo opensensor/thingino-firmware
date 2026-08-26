@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000013 Mon Sep 17 00:00:00 2001
+From: Paul Philippov <paul@thingino.com>
+Date: Wed, 26 Aug 2026 10:15:00 -0400
+Subject: [PATCH] mips: xburst: t30: keep sensor MCLK pinmux with V4L2
+
+The T30 platform omitted MCLK_PORTA whenever CONFIG_VIDEO_V4L2 was enabled.
+That leaves the clock framework running cgu_cim at the requested rate but
+does not route the clock to the physical sensor pin. Sensors consequently
+NACK their I2C address after a V4L2-enabled kernel boots.
+
+The out-of-tree TX-ISP capture driver needs the same SoC pinmux as the
+non-V4L2 driver. Keep the base MCLK_PORTA entry independent of the generic
+V4L2 core configuration. CONFIG_SOC_MCLK remains available to the in-tree
+TX-ISP configuration as before.
+
+Signed-off-by: Paul Philippov <paul@thingino.com>
+---
+ arch/mips/xburst/soc-t30/common/platform.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/mips/xburst/soc-t30/common/platform.c b/arch/mips/xburst/soc-t30/common/platform.c
+index a4ad8b9..fe9dc31 100644
+--- a/arch/mips/xburst/soc-t30/common/platform.c
++++ b/arch/mips/xburst/soc-t30/common/platform.c
+@@ -49,9 +49,7 @@ struct jz_gpio_func_def platform_devio_array[] = {
+ #ifdef CONFIG_I2C2_PC27_PC28
+ 		I2C2_PORTC,
+ #endif
+-#ifndef CONFIG_VIDEO_V4L2
+ 	MCLK_PORTA,
+-#endif
+ #ifdef CONFIG_SOC_MCLK
+ 	MCLK_PORTA,
+ #endif
+-- 
+2.51.0
