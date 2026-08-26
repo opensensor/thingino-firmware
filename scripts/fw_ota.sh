@@ -158,9 +158,15 @@ check_and_free_space() {
 
 	[ "$remote_avail_kb" -ge "$dir_needed_kb" ] && [ "$remote_memavail_kb" -ge "$mem_needed_kb" ] && return 0
 
-	echo "Not enough upload headroom on the device. Attempting to free memory by remapping rmem..."
+	echo "Not enough upload headroom on the device."
 
-	local osmem rmem_val ispmem_val osmem_mb osmem_addr rmem_mb rmem_addr ispmem_mb ispmem_addr new_osmem_mb remap_cmd remap_msg
+	local soc osmem rmem_val ispmem_val osmem_mb osmem_addr rmem_mb rmem_addr ispmem_mb ispmem_addr new_osmem_mb remap_cmd remap_msg
+	soc=$(remote_run "sed -n 's/^SOC=//p' /etc/os-release" 2>/dev/null | tr -d '[:space:]')
+	if [ "$soc" = "t30" ]; then
+		die "Not enough upload headroom on T30. Refusing to remap rmem because the ISP/VPU use that reserved region. Reboot once to clear /tmp or use SD-card staging, then retry."
+	fi
+	echo "Attempting to free memory by remapping rmem..."
+
 	osmem=$(remote_run "fw_printenv -n osmem" | tr -d '[:space:]')
 	rmem_val=$(remote_run "fw_printenv -n rmem" | tr -d '[:space:]')
 	ispmem_val=$(remote_run "fw_printenv -n ispmem 2>/dev/null" | tr -d '[:space:]')
@@ -264,6 +270,7 @@ case "$CAMERA_IP_ADDRESS" in
 	*:*) REMOTE_SCP_HOST="root@[$CAMERA_IP_ADDRESS]" ;;
 esac
 REMOTE_SCRIPT="/tmp/sup"
+REMOTE_SCRIPT2="/tmp/sup2"
 
 SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=2 \
 -o ServerAliveCountMax=30 \
@@ -332,9 +339,12 @@ free_overlay_space() {
 upload_sysupgrade() {
 	remote_copy "$LOCAL_SCRIPT" "$REMOTE_SCP_HOST:$REMOTE_SCRIPT" || \
 		die "Failed to transfer sysupgrade utility"
-	remote_copy "$LOCAL_SCRIPT2" "$REMOTE_SCP_HOST:/sbin/$(basename "$LOCAL_SCRIPT2")" || \
+	remote_copy "$LOCAL_SCRIPT2" "$REMOTE_SCP_HOST:$REMOTE_SCRIPT2" || \
 		die "Failed to transfer sysupgrade-stage2 utility"
-	remote_run "chmod +x $REMOTE_SCRIPT" || \
+	remote_run "chmod +x $REMOTE_SCRIPT $REMOTE_SCRIPT2; \
+		grep -qs ' /sbin/$(basename "$LOCAL_SCRIPT2") ' /proc/mounts && \
+			umount /sbin/$(basename "$LOCAL_SCRIPT2") || true; \
+		mount --bind $REMOTE_SCRIPT2 /sbin/$(basename "$LOCAL_SCRIPT2")" || \
 		die "Failed to set execute permissions on sysupgrade utility"
 	echo "Sysupgrade utility installed successfully."
 }
