@@ -104,7 +104,10 @@ IP_OUTPUT_TAG := $(if $(CAMERA_IP_ADDRESS),$(shell printf '%s' "$(CAMERA_IP_ADDR
 ifdef CAMERA
 THINGINO_USER_CAMERA_DIR := $(THINGINO_USER_DIR)/$(CAMERA)
 ifneq ($(CAMERA_IP_ADDRESS),)
-THINGINO_USER_DEVICE_DIR := $(THINGINO_USER_CAMERA_DIR)/$(CAMERA_IP_ADDRESS)
+# A literal IPv6 address contains colons, which GNU make interprets as rule
+# separators when user files become prerequisites.  Use the same stable,
+# filesystem-safe address tag as the per-device output directory.
+THINGINO_USER_DEVICE_DIR := $(THINGINO_USER_CAMERA_DIR)/$(IP_OUTPUT_TAG)
 endif
 endif
 
