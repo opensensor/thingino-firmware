@@ -259,6 +259,10 @@ LOCAL_FLASH_OTA="$(dirname "$0")/../package/thingino-sysupgrade/files/flash-ota"
 REMOTE_FW_FILE="/tmp/fw.bin"
 REMOTE_FW_DIR="/tmp"
 REMOTE_HOST="root@$CAMERA_IP_ADDRESS"
+REMOTE_SCP_HOST="$REMOTE_HOST"
+case "$CAMERA_IP_ADDRESS" in
+	*:*) REMOTE_SCP_HOST="root@[$CAMERA_IP_ADDRESS]" ;;
+esac
 REMOTE_SCRIPT="/tmp/sup"
 
 SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=2 \
@@ -326,9 +330,9 @@ free_overlay_space() {
 }
 
 upload_sysupgrade() {
-	remote_copy "$LOCAL_SCRIPT" "$REMOTE_HOST:$REMOTE_SCRIPT" || \
+	remote_copy "$LOCAL_SCRIPT" "$REMOTE_SCP_HOST:$REMOTE_SCRIPT" || \
 		die "Failed to transfer sysupgrade utility"
-	remote_copy "$LOCAL_SCRIPT2" "$REMOTE_HOST:/sbin/$(basename "$LOCAL_SCRIPT2")" || \
+	remote_copy "$LOCAL_SCRIPT2" "$REMOTE_SCP_HOST:/sbin/$(basename "$LOCAL_SCRIPT2")" || \
 		die "Failed to transfer sysupgrade-stage2 utility"
 	remote_run "chmod +x $REMOTE_SCRIPT" || \
 		die "Failed to set execute permissions on sysupgrade utility"
@@ -336,7 +340,7 @@ upload_sysupgrade() {
 }
 
 upload_flash_ota() {
-	remote_copy "$LOCAL_FLASH_OTA" "$REMOTE_HOST:/tmp/flash-ota.sh" || \
+	remote_copy "$LOCAL_FLASH_OTA" "$REMOTE_SCP_HOST:/tmp/flash-ota.sh" || \
 		die "Failed to transfer flash-ota"
 	remote_run "chmod +x /tmp/flash-ota.sh" || \
 		die "Failed to set execute permissions on flash-ota"
@@ -362,7 +366,7 @@ if [ "$MODE" = "full" ]; then
 	fi
 
 	echo "Transferring firmware file to the device..."
-	remote_copy "$UPLOAD_FW_FILE" "$REMOTE_HOST:$REMOTE_FW_FILE" || \
+	remote_copy "$UPLOAD_FW_FILE" "$REMOTE_SCP_HOST:$REMOTE_FW_FILE" || \
 		die "The firmware transfer process timed out or failed."
 
 	hash_l=$(sha256sum "$UPLOAD_FW_FILE" | cut -d' ' -f1)
@@ -465,21 +469,21 @@ trap 'rm -f ${TRIMMED_FILES:-}; cleanup' EXIT
 case "$MODE" in
 	boot)
 		echo "Uploading boot partition..."
-		remote_copy "$BOOT_TRIMMED" "$REMOTE_HOST:$REMOTE_BOOT" || die "Failed to upload boot"
+		remote_copy "$BOOT_TRIMMED" "$REMOTE_SCP_HOST:$REMOTE_BOOT" || die "Failed to upload boot"
 		if [ -n "$REMOTE_ENV" ]; then
 			echo "Uploading env partition..."
-			remote_copy "$ENV_TRIMMED" "$REMOTE_HOST:$REMOTE_ENV" || die "Failed to upload env"
+			remote_copy "$ENV_TRIMMED" "$REMOTE_SCP_HOST:$REMOTE_ENV" || die "Failed to upload env"
 		fi
 		;;
 	kernel)
 		echo "Uploading kernel..."
-		remote_copy "$LOCAL_FW_FILE" "$REMOTE_HOST:$REMOTE_KERNEL" || die "Failed to upload kernel"
+		remote_copy "$LOCAL_FW_FILE" "$REMOTE_SCP_HOST:$REMOTE_KERNEL" || die "Failed to upload kernel"
 		;;
 	rootfs)
 		echo "Uploading rootfs partition..."
-		remote_copy "$ROOTFS_TRIMMED" "$REMOTE_HOST:$REMOTE_ROOTFS" || die "Failed to upload rootfs"
+		remote_copy "$ROOTFS_TRIMMED" "$REMOTE_SCP_HOST:$REMOTE_ROOTFS" || die "Failed to upload rootfs"
 		echo "Uploading data partition..."
-		remote_copy "$DATA_TRIMMED" "$REMOTE_HOST:$REMOTE_DATA" || die "Failed to upload data"
+		remote_copy "$DATA_TRIMMED" "$REMOTE_SCP_HOST:$REMOTE_DATA" || die "Failed to upload data"
 		;;
 esac
 
