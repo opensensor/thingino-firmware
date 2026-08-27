@@ -22,6 +22,8 @@ DO_BACKUP=0
 CAMERA_IP_ADDRESS=""
 LOCAL_FW_FILE=""
 TRIMMED_FILES=""
+RAPTOR_INIT_STASHED=0
+RAPTOR_INIT_STASH="/etc/init.d/.S31raptor.ota-disabled"
 while getopts "fBnm:a:p:" opt; do
 	case "$opt" in
 		f) FORCE=1 ;;
@@ -51,6 +53,12 @@ esac
 [ -z "$CAMERA_IP_ADDRESS" ] && die "No IP address specified (-a or positional)"
 
 cleanup() {
+	if [ "${RAPTOR_INIT_STASHED:-0}" -eq 1 ]; then
+		# Best effort only: an interrupted update may catch the camera while it
+		# is rebooting.  Once reachable, leaving the init script restored is the
+		# safest state even though the firmware upload did not finish.
+		remote_run "if [ -f $RAPTOR_INIT_STASH ]; then mv $RAPTOR_INIT_STASH /etc/init.d/S31raptor && chmod 0755 /etc/init.d/S31raptor; fi" >/dev/null 2>&1 || true
+	fi
 	if [ -n "${DEBUG:-}" ]; then
 		ssh -O exit $SSH_OPTS $REMOTE_HOST 2>/dev/null
 	fi
@@ -69,6 +77,24 @@ remote_run() {
 		echo -e "\e[38;5;118mssh $SSH_OPTS $1\e[0m" >&2
 	fi
 	ssh $SSH_OPTS $REMOTE_HOST "$1"
+}
+
+stash_raptor_init() {
+	if remote_run "[ -x /etc/init.d/S31raptor ]" >/dev/null 2>&1; then
+		echo "Temporarily disabling Raptor for the memory-remap boot..."
+		remote_run "cp -p /etc/init.d/S31raptor $RAPTOR_INIT_STASH && rm -f /etc/init.d/S31raptor" || \
+			die "Failed to stage the Raptor init script for the memory-remap boot."
+		RAPTOR_INIT_STASHED=1
+	fi
+}
+
+restore_raptor_init() {
+	[ "$RAPTOR_INIT_STASHED" -eq 1 ] || return 0
+
+	remote_run "if [ -f $RAPTOR_INIT_STASH ]; then mv $RAPTOR_INIT_STASH /etc/init.d/S31raptor && chmod 0755 /etc/init.d/S31raptor; fi" || \
+		die "Failed to restore the Raptor init script after the memory-remap boot."
+	RAPTOR_INIT_STASHED=0
+	echo "Raptor init script restored for the next normal boot."
 }
 
 remote_uptime_seconds() {
@@ -189,6 +215,11 @@ check_and_free_space() {
 
 	echo "Remapping memory: osmem ${osmem_mb}M -> ${new_osmem_mb}M, ${remap_msg}"
 
+	# Raptor's open ISP path requires reserved memory during initialization.
+	# Keep it stopped for this one upload-only boot, where rmem is deliberately
+	# folded into osmem, then restore its init script before flashing.
+	stash_raptor_init
+
 	# Plant a tmpfs marker to verify the camera actually reboots.
 	# /tmp is on tmpfs and gets wiped on every reboot, so if the
 	# marker is still present after we reconnect, the camera did
@@ -229,6 +260,7 @@ check_and_free_space() {
 
 	echo "Re-initializing SSH mux..."
 	ssh -fN $SSH_OPTS $REMOTE_HOST >/dev/null 2>/dev/null || die "Failed to re-initialize SSH connection after reboot"
+	restore_raptor_init
 
 	echo "Re-uploading sysupgrade utility (tmpfs was cleared on reboot)..."
 	upload_sysupgrade
