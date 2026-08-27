@@ -1,0 +1,107 @@
+From: Matt Davis <matteius@gmail.com>
+Subject: [PATCH] media: support external Thingino capture drivers
+
+DMA_SHARED_BUFFER is intentionally hidden because in-tree users select it.
+Thingino also builds out-of-tree capture drivers, so provide a visible switch
+without pulling in an unrelated videobuf2 allocator.
+
+The Ingenic platform tables suppress the sensor MCLK pin when V4L2 is enabled
+and expect the in-tree TX-ISP driver to restore it through CONFIG_SOC_MCLK.
+External TX-ISP drivers must not enable that competing driver merely to obtain
+the pinmux. Add a separate selector and use it in the common XBurst1 platform
+tables.
+
+Signed-off-by: Matt Davis <matteius@gmail.com>
+---
+ arch/mips/xburst/soc-t20/common/platform.c | 7 +------
+ arch/mips/xburst/soc-t21/common/platform.c | 7 +------
+ arch/mips/xburst/soc-t23/common/platform.c | 7 +------
+ arch/mips/xburst/soc-t30/common/platform.c | 7 +------
+ arch/mips/xburst/soc-t31/common/platform.c | 7 +------
+ drivers/media/v4l2-core/Kconfig            | 16 ++++++++++++++++
+ 6 files changed, 21 insertions(+), 30 deletions(-)
+
+diff --git a/drivers/media/v4l2-core/Kconfig b/drivers/media/v4l2-core/Kconfig
+--- a/drivers/media/v4l2-core/Kconfig
++++ b/drivers/media/v4l2-core/Kconfig
+@@ -7,6 +7,23 @@ config VIDEO_V4L2
+ 	depends on (I2C || I2C=n) && VIDEO_DEV
+ 	default (I2C || I2C=n) && VIDEO_DEV
+ 
++config THINGINO_DMA_SHARED_BUFFER
++	bool "DMA-BUF support for external capture drivers"
++	depends on VIDEO_V4L2 && HAS_DMA
++	select DMA_SHARED_BUFFER
++	help
++	  Enable DMA-BUF export for capture drivers built outside the kernel
++	  tree without selecting an unused in-tree video driver.
++
++config THINGINO_EXTERNAL_SENSOR_MCLK
++	bool "Sensor MCLK for external capture drivers"
++	depends on VIDEO_V4L2 && MIPS
++	help
++	  Keep the Ingenic SoC sensor master-clock pin muxed when capture is
++	  provided by an out-of-tree driver. This replaces the pinmux side
++	  effect of the in-tree TX-ISP driver without enabling that competing
++	  driver.
++
+ config VIDEO_ADV_DEBUG
+ 	bool "Enable advanced debug functionality on V4L2 drivers"
+ 	default n
+diff --git a/arch/mips/xburst/soc-t20/common/platform.c b/arch/mips/xburst/soc-t20/common/platform.c
+--- a/arch/mips/xburst/soc-t20/common/platform.c
++++ b/arch/mips/xburst/soc-t20/common/platform.c
+@@ -49,6 +49,3 @@ struct jz_gpio_func_def platform_devio_array[] = {
+-#ifndef CONFIG_VIDEO_V4L2
+-	MCLK_PORTA,
+-#endif
+-#ifdef CONFIG_SOC_MCLK
++#if !defined(CONFIG_VIDEO_V4L2) || defined(CONFIG_SOC_MCLK) || defined(CONFIG_THINGINO_EXTERNAL_SENSOR_MCLK)
+ 	MCLK_PORTA,
+ #endif
+diff --git a/arch/mips/xburst/soc-t21/common/platform.c b/arch/mips/xburst/soc-t21/common/platform.c
+--- a/arch/mips/xburst/soc-t21/common/platform.c
++++ b/arch/mips/xburst/soc-t21/common/platform.c
+@@ -52,6 +52,3 @@ struct jz_gpio_func_def platform_devio_array[] = {
+-#ifndef CONFIG_VIDEO_V4L2
+-	MCLK_PORTA,
+-#endif
+-#ifdef CONFIG_SOC_MCLK
++#if !defined(CONFIG_VIDEO_V4L2) || defined(CONFIG_SOC_MCLK) || defined(CONFIG_THINGINO_EXTERNAL_SENSOR_MCLK)
+ 	MCLK_PORTA,
+ #endif
+diff --git a/arch/mips/xburst/soc-t23/common/platform.c b/arch/mips/xburst/soc-t23/common/platform.c
+--- a/arch/mips/xburst/soc-t23/common/platform.c
++++ b/arch/mips/xburst/soc-t23/common/platform.c
+@@ -67,6 +67,3 @@ struct jz_gpio_func_def platform_devio_array[] = {
+-#ifndef CONFIG_VIDEO_V4L2
+-	MCLK_PORTA,
+-#endif
+-#ifdef CONFIG_SOC_MCLK
++#if !defined(CONFIG_VIDEO_V4L2) || defined(CONFIG_SOC_MCLK) || defined(CONFIG_THINGINO_EXTERNAL_SENSOR_MCLK)
+ 	MCLK_PORTA,
+ #endif
+diff --git a/arch/mips/xburst/soc-t30/common/platform.c b/arch/mips/xburst/soc-t30/common/platform.c
+--- a/arch/mips/xburst/soc-t30/common/platform.c
++++ b/arch/mips/xburst/soc-t30/common/platform.c
+@@ -52,6 +52,3 @@ struct jz_gpio_func_def platform_devio_array[] = {
+-#ifndef CONFIG_VIDEO_V4L2
+-	MCLK_PORTA,
+-#endif
+-#ifdef CONFIG_SOC_MCLK
++#if !defined(CONFIG_VIDEO_V4L2) || defined(CONFIG_SOC_MCLK) || defined(CONFIG_THINGINO_EXTERNAL_SENSOR_MCLK)
+ 	MCLK_PORTA,
+ #endif
+diff --git a/arch/mips/xburst/soc-t31/common/platform.c b/arch/mips/xburst/soc-t31/common/platform.c
+--- a/arch/mips/xburst/soc-t31/common/platform.c
++++ b/arch/mips/xburst/soc-t31/common/platform.c
+@@ -57,6 +57,3 @@ struct jz_gpio_func_def platform_devio_array[] = {
+-#ifndef CONFIG_VIDEO_V4L2
+-	MCLK_PORTA,
+-#endif
+-#ifdef CONFIG_SOC_MCLK
++#if !defined(CONFIG_VIDEO_V4L2) || defined(CONFIG_SOC_MCLK) || defined(CONFIG_THINGINO_EXTERNAL_SENSOR_MCLK)
+ 	MCLK_PORTA,
+ #endif
+-- 
+2.51.0

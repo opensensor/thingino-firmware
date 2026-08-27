@@ -1,5 +1,6 @@
 config BR2_PACKAGE_OPEN_TX_ISP_SUPPORTED
 	bool
+	default y if BR2_SOC_FAMILY = "t21" && KERNEL_VERSION_3
 	default y if BR2_SOC_FAMILY = "t23" && KERNEL_VERSION_3
 	default y if BR2_SOC_FAMILY = "t31" && BR2_INGENIC_SOC_MODEL != "c100" && KERNEL_VERSION_3
 	default y if BR2_SOC_FAMILY = "t40" && KERNEL_VERSION_4
@@ -13,12 +14,12 @@ config BR2_PACKAGE_OPEN_TX_ISP
 	depends on BR2_THINGINO_DEV_CAMERA
 	help
 	  Open-source replacement for the proprietary Ingenic TX-ISP
-	  kernel driver. Builds the driver for the selected T23, T31,
+	  kernel driver. Builds the driver for the selected T21, T23, T31,
 	  T40, or T41 SoC and installs it under the canonical
 	  tx-isp-<soc>.ko module name.
 
 	  The active upstream targets are the vendor Linux 3.10.14 trees
-	  for T23/T31 and Linux 4.4.94 trees for T40/T41. The recovered
+	  for T21/T23/T31 and Linux 4.4.94 trees for T40/T41. The recovered
 	  drivers are experimental and image quality is not yet
 	  OEM-equivalent on every sensor.
 
@@ -29,3 +30,16 @@ config BR2_PACKAGE_OPEN_TX_ISP
 	  https://github.com/opensensor/open-tx-isp
 
 	  If unsure, say N.
+
+config BR2_PACKAGE_OPEN_TX_ISP_V4L2
+	bool "V4L2 capture adapter"
+	depends on BR2_PACKAGE_OPEN_TX_ISP
+	depends on BR2_SOC_FAMILY = "t21" || BR2_SOC_FAMILY = "t30" || BR2_SOC_FAMILY = "t31" || BR2_SOC_FAMILY = "t41"
+	default y
+	help
+	  Build the public TX-ISP capture adapter and enable the kernel V4L2
+	  and DMA-BUF facilities it needs. This provides /dev/video0 for
+	  streamers that support direct V4L2 capture.
+
+	  Sensor setup and image tuning remain in the normal IMP/sensor path;
+	  the adapter only exposes the resulting NV12 frame channel.
