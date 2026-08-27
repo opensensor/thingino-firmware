@@ -26,6 +26,7 @@ if BR2_PACKAGE_THINGINO_UHTTPD
 config BR2_PACKAGE_THINGINO_UHTTPD_TLS
 	bool "Enable TLS/HTTPS support"
 	default y
+	select BR2_PACKAGE_THINGINO_USTREAM_SSL
 	help
 	  Enable TLS/HTTPS support for uhttpd.
 	  This provides secure encrypted connections to the camera's
