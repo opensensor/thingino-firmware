@@ -1,5 +1,6 @@
 THINGINO_RAPTOR_VERSION = 17804903e1414d426802df0967b3bdbd72219f58
-THINGINO_RAPTOR_SITE = https://github.com/gtxaspec/raptor
+THINGINO_RAPTOR_SITE = https://github.com/matteius/raptor
+THINGINO_RAPTOR_SITE_BRANCH = fix/ric-night-probe-stability-upstream
 THINGINO_RAPTOR_SITE_METHOD = git
 
 THINGINO_RAPTOR_LICENSE = GPL-3.0
