@@ -1,5 +1,6 @@
 config BR2_PACKAGE_OPENIMP_SUPPORTED
 	bool
+	default y if BR2_SOC_FAMILY = "t21" && KERNEL_VERSION_3
 	default y if BR2_SOC_FAMILY = "t31" && BR2_INGENIC_SOC_MODEL != "c100" && KERNEL_VERSION_3
 	default y if BR2_SOC_FAMILY = "t40" && KERNEL_VERSION_4
 	default y if BR2_SOC_FAMILY = "t41" && KERNEL_VERSION_4
@@ -15,7 +16,7 @@ config BR2_PACKAGE_OPENIMP
 	  reverse-engineered implementation of libimp.so that can
 	  replace the proprietary Ingenic library.
 
-	  Current upstream device builds support T31, T40, and T41. This
+	  Current upstream device builds support T21, T31, T40, and T41. This
 	  package installs the matching build/<soc>/libimp.so in staging
 	  and on the target, then preserves that replacement during
 	  target finalization.
