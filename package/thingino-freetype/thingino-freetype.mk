@@ -7,4 +7,4 @@
 # Bump Buildroot's freetype when this shadow package is enabled.
 THINGINO_FREETYPE_DEPENDENCIES = freetype
 
-$(eval $(virtual-package))
+$(eval $(generic-package))

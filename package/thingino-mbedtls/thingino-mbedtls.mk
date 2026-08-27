@@ -7,4 +7,4 @@
 # The actual mbedtls overrides live in mbedtls-override.mk.
 THINGINO_MBEDTLS_DEPENDENCIES = mbedtls
 
-$(eval $(virtual-package))
+$(eval $(generic-package))

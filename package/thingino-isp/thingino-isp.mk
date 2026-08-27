@@ -7,4 +7,4 @@
 # Virtual package - no source
 THINGINO_ISP_LICENSE = N/A
 
-$(eval $(virtual-package))
+$(eval $(generic-package))

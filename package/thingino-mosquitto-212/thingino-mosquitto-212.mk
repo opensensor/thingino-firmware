@@ -8,5 +8,5 @@
 THINGINO_MOSQUITTO_212_DEPENDENCIES = mosquitto
 HOST_THINGINO_MOSQUITTO_212_DEPENDENCIES = host-mosquitto
 
-$(eval $(virtual-package))
+$(eval $(generic-package))
 $(eval $(host-virtual-package))

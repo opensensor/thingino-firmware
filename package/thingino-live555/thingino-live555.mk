@@ -7,4 +7,4 @@
 # The actual live555 overrides live in live555-override.mk.
 THINGINO_LIVE555_DEPENDENCIES = live555
 
-$(eval $(virtual-package))
+$(eval $(generic-package))

@@ -7,4 +7,4 @@
 # The actual libwebsockets overrides live in libwebsockets-override.mk.
 THINGINO_LIBWEBSOCKETS_DEPENDENCIES = libwebsockets
 
-$(eval $(virtual-package))
+$(eval $(generic-package))
