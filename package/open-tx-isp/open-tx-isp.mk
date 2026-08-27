@@ -30,6 +30,8 @@ OPEN_TX_ISP_MODULE_MAKE_OPTS += \
 	-I$(LINUX_DIR)/arch/mips/xburst/core/include \
 	-I$(LINUX_DIR)/arch/mips/xburst/common/include"
 
+# Keep the public capture adapter optional: the open driver also supports the
+# legacy IMP ABI, while direct V4L2 users require both the adapter and DMA-BUF.
 ifeq ($(BR2_PACKAGE_OPEN_TX_ISP_V4L2),y)
 ifeq ($(KERNEL_VERSION_4),y)
 OPEN_TX_ISP_DMA_CONFIG = CONFIG_THINGINO_VIDEOBUF2_DMA_CONTIG
