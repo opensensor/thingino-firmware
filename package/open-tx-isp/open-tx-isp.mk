@@ -7,7 +7,7 @@
 OPEN_TX_ISP_SITE_METHOD = git
 OPEN_TX_ISP_SITE = https://github.com/opensensor/open-tx-isp
 OPEN_TX_ISP_SITE_BRANCH = main
-OPEN_TX_ISP_VERSION = caf18dbd58af09d84295036123fe2514a0bacd30
+OPEN_TX_ISP_VERSION = 4e67fbb7aa8e2f095a85ab44ef38bf3db71e0a81
 
 # Upstream identifies the project as GPLv3 but does not currently ship a
 # top-level license file for legal-info to collect.
@@ -33,6 +33,12 @@ OPEN_TX_ISP_MODULE_MAKE_OPTS += \
 # Keep the public capture adapter optional: the open driver also supports the
 # legacy IMP ABI, while direct V4L2 users require both the adapter and DMA-BUF.
 ifeq ($(BR2_PACKAGE_OPEN_TX_ISP_V4L2),y)
+ifeq ($(SOC_FAMILY),t31)
+OPEN_TX_ISP_MODULE_MAKE_OPTS += CONFIG_TX_ISP_T31_V4L2=y
+else ifeq ($(SOC_FAMILY),t41)
+OPEN_TX_ISP_MODULE_MAKE_OPTS += CONFIG_TX_ISP_T41_V4L2=y
+endif
+
 ifeq ($(KERNEL_VERSION_4),y)
 OPEN_TX_ISP_DMA_CONFIG = CONFIG_THINGINO_VIDEOBUF2_DMA_CONTIG
 else
