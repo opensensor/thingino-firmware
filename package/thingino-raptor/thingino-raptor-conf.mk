@@ -11,7 +11,7 @@ define THINGINO_RAPTOR_PATCH_CONF
 	CONF=$(TARGET_DIR)/etc/raptor.conf; \
 	rset() { \
 		[ -n "$$3" ] && \
-		sed -i "/^\[$$1\]/,/^\[/{s|^[# ]*$$2 = .*|$$2 = $$3|;}" "$$CONF" || true; \
+		sed -i "/^\[$$1\]/,/^[# ]*\[/{s|^[# ]*$$2 = .*|$$2 = $$3|;}" "$$CONF" || true; \
 	}; \
 	\
 	if [ "$(BR2_PACKAGE_THINGINO_ISP_OPEN):$(BR2_PACKAGE_OPENIMP)" = "y:y" ] && \
