@@ -11,3 +11,17 @@ config BR2_PACKAGE_LIGHTNVR
 	  Experimental NVR for Ingenic SoC's.
 	  Automatically enables FFmpeg with staging installation
 	  and required libraries for CMake-based builds.
+
+config BR2_PACKAGE_LIGHTNVR_SOD
+	bool "SOD object detection"
+	depends on BR2_PACKAGE_LIGHTNVR
+	help
+	  Build and install LightNVR's SOD object-detection engine.
+
+config BR2_PACKAGE_LIGHTNVR_SOD_INGENIC_MXU
+	bool "Ingenic MXU2/MXU3 acceleration"
+	depends on BR2_PACKAGE_LIGHTNVR_SOD
+	depends on BR2_mips || BR2_mipsel
+	default y
+	help
+	  Enable runtime-dispatched Ingenic SIMD acceleration for SOD.
