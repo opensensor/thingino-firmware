@@ -1,6 +1,7 @@
 LIGHTNVR_SITE_METHOD = git
 LIGHTNVR_SITE = https://github.com/opensensor/lightNVR
-LIGHTNVR_VERSION = 1755670975b54c20a0d645253c95b7e2e5deffa8
+LIGHTNVR_SITE_BRANCH = main
+LIGHTNVR_VERSION = 0d1f0047c9590c0bcc835d1e783f1222e2985d46
 
 LIGHTNVR_LICENSE = MIT
 LIGHTNVR_LICENSE_FILES = COPYING
@@ -19,17 +20,24 @@ ifeq ($(BR2_PACKAGE_WOLFSSL),y)
 LIGHTNVR_DEPENDENCIES += wolfssl
 endif
 
-# Enable SOD with dynamic linking and go2rtc, use bundled cJSON
 LIGHTNVR_CONF_OPTS = \
 	-DLIGHTNVR_PROFILE=embedded \
-	-DENABLE_SOD=OFF \
-	-DSOD_DYNAMIC_LINK=ON \
 	-DENABLE_GO2RTC=ON \
 	-DGO2RTC_BINARY_PATH=/bin/go2rtc \
 	-DGO2RTC_CONFIG_DIR=/etc/lightnvr/go2rtc \
 	-DGO2RTC_API_PORT=1984 \
 	-DCMAKE_BUILD_TYPE=Release
 
+ifeq ($(BR2_PACKAGE_LIGHTNVR_SOD),y)
+LIGHTNVR_CONF_OPTS += -DENABLE_SOD=ON -DSOD_DYNAMIC_LINK=ON
+ifeq ($(BR2_PACKAGE_LIGHTNVR_SOD_INGENIC_MXU),y)
+LIGHTNVR_CONF_OPTS += -DSOD_ENABLE_INGENIC_MXU=ON
+else
+LIGHTNVR_CONF_OPTS += -DSOD_ENABLE_INGENIC_MXU=OFF
+endif
+else
+LIGHTNVR_CONF_OPTS += -DENABLE_SOD=OFF
+endif
 
 # Build web assets before CMake configuration
 # Web assets are no longer checked into git, so we build them here
@@ -82,17 +90,19 @@ define LIGHTNVR_INSTALL_APP_FILES
 	rm -f $(TARGET_DIR)/etc/init.d/S97go2rtc
 endef
 
-# SOD shared libraries installation - specifically using the src/sod version
+ifeq ($(BR2_PACKAGE_LIGHTNVR_SOD),y)
 define LIGHTNVR_INSTALL_LIBSOD
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/usr/lib
 	$(INSTALL) -m 0755 $(@D)/src/sod/libsod.so.1.1.9 $(TARGET_DIR)/usr/lib/
-	ln -s libsod.so.1.1.9 $(TARGET_DIR)/usr/lib/libsod.so.1
-	ln -s libsod.so.1.1.9 $(TARGET_DIR)/usr/lib/libsod.so
+	ln -sf libsod.so.1.1.9 $(TARGET_DIR)/usr/lib/libsod.so.1
+	ln -sf libsod.so.1.1.9 $(TARGET_DIR)/usr/lib/libsod.so
 endef
+endif
 
 # The complete target installation command set
 define LIGHTNVR_INSTALL_TARGET_CMDS
 	$(LIGHTNVR_INSTALL_APP_FILES)
+	$(LIGHTNVR_INSTALL_LIBSOD)
 endef
 
 $(eval $(cmake-package))
