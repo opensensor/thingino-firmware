@@ -6,6 +6,7 @@ config BR2_PACKAGE_LIGHTNVR
 	select BR2_PACKAGE_THINGINO_FFMPEG
 	select BR2_PACKAGE_SQLITE
 	select BR2_PACKAGE_CJSON
+	select BR2_PACKAGE_ZLIB
 	default n
 	help
 	  Experimental NVR for Ingenic SoC's.
