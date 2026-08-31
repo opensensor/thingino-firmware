@@ -30,6 +30,13 @@ define THINGINO_CORE_MERGE_THINGINO_JSON
 			$(HOST_DIR)/bin/jct "$(THINGINO_CORE_OUTPUT_FILE)" import "$$FRAGMENT" || true; \
 	done
 
+	# Per-package target snapshots can contain an older 90-camera.json after a
+	# profile-only change.  Re-import the authoritative camera file during
+	# finalization so the packed rootfs always reflects the selected profile.
+	CAMERA_CONFIG=$(BR2_EXTERNAL_THINGINO_PATH)/$(CAMERA_SUBDIR)/$(CAMERA)/thingino.json; \
+	[ -s "$$CAMERA_CONFIG" ] && \
+		$(HOST_DIR)/bin/jct "$(THINGINO_CORE_OUTPUT_FILE)" import "$$CAMERA_CONFIG" || true
+
 	# Apply user overrides last (non-empty only, to avoid parse errors)
 	for USER_CONFIG in $(THINGINO_USER_JSON_FILES); do \
 		[ -s "$$USER_CONFIG" ] && \
