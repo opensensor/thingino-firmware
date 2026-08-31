@@ -1,0 +1,87 @@
+From 87026c586020eb47a806de1ed0a3569c2ec3e2b1 Mon Sep 17 00:00:00 2001
+From: Thingino Build System <thingino@localhost>
+Date: Mon, 31 Aug 2026 13:58:00 -0400
+Subject: [PATCH] t41: cache MDNS dimensions during sensor sync
+
+The ISP-core singleton is not published until after the legacy IMP buffer
+queries.  Cache the validated sensor dimensions in the sensor-sync callback
+instead of walking that not-yet-published pointer.  This also confines access
+to the OEM video structure to the callback which owns it.
+---
+ driver/t41/tx_isp_t41_recovered.c | 33 ++++++++++++++++++++-------------
+ 1 file changed, 20 insertions(+), 13 deletions(-)
+
+diff --git a/driver/t41/tx_isp_t41_recovered.c b/driver/t41/tx_isp_t41_recovered.c
+index e11a2ae..543657c 100644
+--- a/driver/t41/tx_isp_t41_recovered.c
++++ b/driver/t41/tx_isp_t41_recovered.c
+@@ -2032,2 +2032,4 @@ struct t41_isp_buf_info {
+-static struct t41_isp_buf_info t41_mdns_buf_info[3];
++static struct t41_isp_buf_info t41_mdns_buf_info[3];
++static uint32_t t41_mdns_input_width[3];
++static uint32_t t41_mdns_input_height[3];
+ static struct t41_isp_buf_info t41_wdr_buf_info[3];
+@@ -33155,9 +33157,7 @@ static uint64_t t41_mdns_round_1k(uint64_t value)
+ static int t41_mdns_build_layout(uint32_t vinum,
+                                  struct t41_mdns_layout *layout)
+ {
+-    uintptr_t core;
+     uint8_t *info;
+-    uint8_t *video;
+     uint64_t pixels;
+     uint64_t used;
+     uint64_t size;
+@@ -33174,16 +33174,10 @@ static int t41_mdns_build_layout(uint32_t vinum,
+         width = *(uint32_t *)(void *)(info + 20);
+         height = *(uint32_t *)(void *)(info + 24);
+     } else {
+-        core = *(uint32_t *)(void *)g_ispcore;
+-        if (!t41_kernel_data_ptr((void *)core))
+-            return -ENODEV;
+-        video = (uint8_t *)core + 308U + vinum * 96U;
+-        width = *(uint32_t *)(void *)(video + 60);
+-        height = *(uint32_t *)(void *)(video + 64);
+-        if (!width || !height) {
+-            width = *(uint32_t *)(void *)(video + 0);
+-            height = *(uint32_t *)(void *)(video + 4);
+-        }
++        width = READ_ONCE(t41_mdns_input_width[vinum]);
++        height = READ_ONCE(t41_mdns_input_height[vinum]);
++        if (!width || !height)
++            return -ENODEV;
+         printk(KERN_WARNING
+                "tx_isp_t41_recovered: pre-init MDNS layout vinum=%u %ux%u\n",
+                vinum, width, height);
+@@ -159210,6 +159204,8 @@ int64_t ispcore_sync_sensor_attr(uintptr_t a0, uint32_t a1)
+ 
+     if (!a1) {
+         memset((void *)(core + 308), 0, 96);
++        memset(t41_mdns_input_width, 0, sizeof(t41_mdns_input_width));
++        memset(t41_mdns_input_height, 0, sizeof(t41_mdns_input_height));
+         return 0;
+     }
+ 
+@@ -159222,10 +159218,21 @@ int64_t ispcore_sync_sensor_attr(uintptr_t a0, uint32_t a1)
+ 
+     sensor_id = *(uint16_t *)(info + 84);
+     if (sensor_id >= 3)
+         return -EINVAL;
+     memcpy((void *)(core + 308 + sensor_id * 96), video, 96);
++    t41_mdns_input_width[sensor_id] = *(uint32_t *)(video + 60);
++    t41_mdns_input_height[sensor_id] = *(uint32_t *)(video + 64);
++    if (!t41_mdns_input_width[sensor_id] ||
++        !t41_mdns_input_height[sensor_id]) {
++        t41_mdns_input_width[sensor_id] = *(uint32_t *)(video + 0);
++        t41_mdns_input_height[sensor_id] = *(uint32_t *)(video + 4);
++    }
++    printk(KERN_WARNING
++           "tx_isp_t41_recovered: sensor-sync MDNS layout vinum=%u %ux%u\n",
++           sensor_id, t41_mdns_input_width[sensor_id],
++           t41_mdns_input_height[sensor_id]);
+ 
+     /* Rebuild the compact sensor description consumed by
+      * tiziano_sync_sensor_attr.  These field mappings follow the T41 OEM
+      * implementation; T40 uses the same video/attribute split. */
+     memset(tisp_attr, 0, sizeof(tisp_attr));
+-- 
+2.51.0

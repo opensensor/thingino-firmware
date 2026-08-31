@@ -1,0 +1,67 @@
+From 1ce9a46d3a0fb96f6556578fa1f49285f6a01dfa Mon Sep 17 00:00:00 2001
+From: Thingino Build System <thingino@localhost>
+Date: Mon, 31 Aug 2026 13:35:00 -0400
+Subject: [PATCH] t41: answer MDNS size queries before ISP init
+
+The legacy IMP startup sequence asks for the MDNS reserved-memory size after
+selecting the sensor but before it initializes the ISP algorithms.  At that
+point mdns_info does not exist yet, so using it as the only source of the
+sensor dimensions makes GET_MDNS_BUF_INFO fail with -ENODEV.
+
+The sensor synchronization performed by S_INPUT has already copied the active
+video description into the ISP core.  Use its maximum input dimensions while
+mdns_info is unavailable, falling back to the current media-bus dimensions
+for drivers which do not populate the maximum fields.  Once MDNS is
+initialized, retain the existing source of truth.
+---
+ driver/t41/tx_isp_t41_recovered.c | 28 +++++++++++++++++++++++-----
+ 1 file changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/driver/t41/tx_isp_t41_recovered.c b/driver/t41/tx_isp_t41_recovered.c
+index 9e40f38..e11a2ae 100644
+--- a/driver/t41/tx_isp_t41_recovered.c
++++ b/driver/t41/tx_isp_t41_recovered.c
+@@ -33155,19 +33155,37 @@ static uint64_t t41_mdns_round_1k(uint64_t value)
+ static int t41_mdns_build_layout(uint32_t vinum,
+                                  struct t41_mdns_layout *layout)
+ {
++    uintptr_t core;
+     uint8_t *info;
++    uint8_t *video;
+     uint64_t pixels;
+     uint64_t used;
+     uint64_t size;
+     uint32_t width;
+     uint32_t height;
+     uint32_t memopt;
+ 
+-    if (!layout || vinum != 0 || !mdns_info)
++    if (!layout || vinum != 0)
+         return -ENODEV;
+-    info = (uint8_t *)(uintptr_t)mdns_info;
+-    width = *(uint32_t *)(void *)(info + 20);
+-    height = *(uint32_t *)(void *)(info + 24);
++    if (mdns_info) {
++        info = (uint8_t *)(uintptr_t)mdns_info;
++        width = *(uint32_t *)(void *)(info + 20);
++        height = *(uint32_t *)(void *)(info + 24);
++    } else {
++        core = *(uint32_t *)(void *)g_ispcore;
++        if (!t41_kernel_data_ptr((void *)core))
++            return -ENODEV;
++        video = (uint8_t *)core + 308U + vinum * 96U;
++        width = *(uint32_t *)(void *)(video + 60);
++        height = *(uint32_t *)(void *)(video + 64);
++        if (!width || !height) {
++            width = *(uint32_t *)(void *)(video + 0);
++            height = *(uint32_t *)(void *)(video + 4);
++        }
++        printk(KERN_WARNING
++               "tx_isp_t41_recovered: pre-init MDNS layout vinum=%u %ux%u\n",
++               vinum, width, height);
++    }
+     if (!width || !height)
+         return -EINVAL;
+ 
+-- 
+2.51.0

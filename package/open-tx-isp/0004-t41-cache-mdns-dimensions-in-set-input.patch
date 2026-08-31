@@ -1,0 +1,38 @@
+From 6f60b52435c6f8d6412c12282fc00824834c93b5 Mon Sep 17 00:00:00 2001
+From: Thingino Project <thingino@thingino.com>
+Date: Mon, 31 Aug 2026 16:22:00 -0400
+Subject: [PATCH] t41: cache MDNS dimensions in set-input
+
+Some sensor notification implementations consume the sync-attribute event
+without forwarding it to ispcore_sync_sensor_attr.  The selected sensor's
+video structure is nevertheless available in the set-input path, and its
+active width and height are the same fields used for the ioctl reply.
+
+Cache those dimensions immediately after a successful sync event.  This is
+the last guaranteed point before userspace asks for the MDNS buffer size and
+avoids depending on an optional notification callback.
+---
+ driver/t41/tx_isp_t41_recovered.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/driver/t41/tx_isp_t41_recovered.c b/driver/t41/tx_isp_t41_recovered.c
+index 543657c..dd1c7f4 100644
+--- a/driver/t41/tx_isp_t41_recovered.c
++++ b/driver/t41/tx_isp_t41_recovered.c
+@@ -13363,6 +13363,14 @@ int32_t subdev_sensor_ops_set_input(void* arg1, int32_t* arg2, int32_t arg3)
+ 	       "tx_isp_t41_recovered: set-input sync-attr exit ret=%d\n", ret);
+     if (ret)
+         return ret;
++    WRITE_ONCE(t41_mdns_input_width[vinum],
++               *(uint32_t *)(sensor + 784));
++    WRITE_ONCE(t41_mdns_input_height[vinum],
++               *(uint32_t *)(sensor + 788));
++    printk(KERN_WARNING
++           "tx_isp_t41_recovered: set-input MDNS layout vinum=%u %ux%u\n",
++           vinum, READ_ONCE(t41_mdns_input_width[vinum]),
++           READ_ONCE(t41_mdns_input_height[vinum]));
+ 
+ 	printk(KERN_WARNING
+ 	       "tx_isp_t41_recovered: set-input init enter sensor=%p enable=%u vinum=%u\n",
+-- 
+2.51.0

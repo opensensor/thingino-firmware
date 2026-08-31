@@ -1,0 +1,68 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Thingino developers <developers@thingino.com>
+Date: Mon, 31 Aug 2026 16:20:00 -0400
+Subject: [PATCH] t41: fail closed on unsafe saturation scaling
+
+The recovered T41 saturation shortcut multiplies every coefficient in the
+active BCSH transform by the requested saturation.  That does not preserve
+the luminance row: values below the unity setting can collapse a live frame
+to almost solid green.
+
+Keep the proven unity setting as a no-op and reject all other values until
+the full T31-style signed, luminance-preserving matrix transform is recovered
+for T41.  Returning -EOPNOTSUPP is preferable to silently damaging a running
+pipeline.
+---
+ driver/t41/tx_isp_t41_recovered.c | 31 ++++++++++---------------------
+ 1 file changed, 10 insertions(+), 21 deletions(-)
+
+diff --git a/driver/t41/tx_isp_t41_recovered.c b/driver/t41/tx_isp_t41_recovered.c
+index 1111111..2222222 100644
+--- a/driver/t41/tx_isp_t41_recovered.c
++++ b/driver/t41/tx_isp_t41_recovered.c
+@@ -153015,33 +153015,22 @@ int32_t tisp_set_saturation(uint32_t a0, uint32_t a1)
+ #ifdef REGTRACE_KERNEL_TREE_BUILD
+     uint8_t *attrs = (uint8_t *)(uintptr_t)tisp_tattr;
+     uint32_t saturation = a1 & 0xffU;
+-    uint32_t high;
+-    uint32_t low;
+ 
+     if (a0 != 0 || !t41_kernel_data_ptr(attrs))
+         return -EINVAL;
+-    attrs[a0] = saturation;
+ 
+     /*
+-     * Scale the proven stock BCSH matrix directly, as in the crash-safe T40
+-     * recovery.  128 is exact unity and preserves the accepted T41 bank.
++     * The three recovered words are part of the complete RGB-to-YUV
++     * transform, not independent chroma gains.  Scaling every coefficient
++     * toward zero destroys the luminance-preserving row and produces a
++     * nearly solid-green frame.  T31 rebuilds the full signed matrix for a
++     * saturation change; T41 does not have an equivalent recovered writer
++     * yet, so fail closed for anything except exact unity.
+      */
+-#define T41_WRITE_SCALED_BCSH(_register, _word) do { \
+-        high = (((_word) >> 16) & 0xffffU) * saturation / 128U; \
+-        low = ((_word) & 0xffffU) * saturation / 128U; \
+-        if (high > 0x0fffU) \
+-            high = 0x0fffU; \
+-        if (low > 0x0fffU) \
+-            low = 0x0fffU; \
+-        system_reg_write((_register), (high << 16) | low); \
+-    } while (0)
+-    T41_WRITE_SCALED_BCSH(0x11018U, 0x03fd0400U);
+-    T41_WRITE_SCALED_BCSH(0x1101cU, 0x04020400U);
+-    T41_WRITE_SCALED_BCSH(0x11020U, 0x04020400U);
+-#undef T41_WRITE_SCALED_BCSH
+-    printk(KERN_INFO
+-           "tx_isp_t41_recovered: safe BCSH saturation scaled to %u/128\n",
+-           saturation);
++    if (saturation != 128U)
++        return -EOPNOTSUPP;
++
++    attrs[a0] = saturation;
+     return 0;
+ #else
+     uint32_t local_14 = 0;
+-- 
+2.51.0

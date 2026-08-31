@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Thingino Project <dev@thingino.com>
+Date: Mon, 31 Aug 2026 13:01:00 -0400
+Subject: [PATCH] t41: require videobuf2 for V4L2 adapter
+
+Keep the recovered legacy ISP loadable when a caller requests the optional
+V4L2 adapter against a kernel without videobuf2 DMA-contiguous support.
+Only link the adapter and define its feature macro when both sides of the
+contract are present.
+
+Signed-off-by: Thingino Project <dev@thingino.com>
+---
+ driver/t41/Kbuild | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/driver/t41/Kbuild b/driver/t41/Kbuild
+index 88ceebe..8b9dd21 100644
+--- a/driver/t41/Kbuild
++++ b/driver/t41/Kbuild
+@@ -7,13 +7,16 @@ tx-isp-t41-objs := tx_isp_t41_recovered.o \
+ 		   tx_isp_t41_exposure.o \
+ 		   tx_isp_t41_scaler.o \
+ 		   tx_isp_t41_tuning_abi.o
+-tx-isp-t41-$(CONFIG_TX_ISP_T41_V4L2) += tx_isp_t41_video_queue.o \
+-					       tx_isp_t41_v4l2.o
++ifneq ($(filter y m,$(CONFIG_VIDEOBUF2_DMA_CONTIG)),)
++tx-isp-t41-$(CONFIG_TX_ISP_T41_V4L2) += \
++					tx_isp_t41_video_queue.o \
++					tx_isp_t41_v4l2.o
++ccflags-$(CONFIG_TX_ISP_T41_V4L2) += -DCONFIG_TX_ISP_T41_V4L2
++endif
+ obj-m += tx-isp-t41.o
+ 
+ ccflags-y += -I$(src)/../include
+ ccflags-y += -DREGTRACE_KERNEL_TREE_BUILD
+-ccflags-$(CONFIG_TX_ISP_T41_V4L2) += -DCONFIG_TX_ISP_T41_V4L2
+ ccflags-y += -std=gnu99
+ ccflags-y += -fpermissive
+ ccflags-y += -w
+-- 
+2.51.0
