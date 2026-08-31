@@ -11,6 +11,11 @@ THINGINO_RAPTOR_DEPENDENCIES += thingino-webui thingino-agent
 ifeq ($(BR2_PACKAGE_OPENIMP),y)
 THINGINO_RAPTOR_DEPENDENCIES += openimp
 THINGINO_RAPTOR_MAKE_OPTS += V4L2_OPENIMP=1
+# OpenIMP intentionally implements the active AI/AO surface but not the
+# dormant SDK AENC/ADEC/DMIC entry points retained in the HAL ABI.  Link
+# against Ingenic's complete ABI without installing that blob on target;
+# OpenIMP and the neo audio/system libraries remain the runtime providers.
+THINGINO_RAPTOR_MAKE_OPTS += LIB_IMP=$(PER_PACKAGE_DIR)/ingenic-lib/host/$(STAGING_SUBDIR)/usr/lib/libimp.so
 endif
 ifeq ($(BR2_PACKAGE_INGENIC_SYSTEM_LIBS_NEO),y)
 THINGINO_RAPTOR_DEPENDENCIES += ingenic-system-libs-neo

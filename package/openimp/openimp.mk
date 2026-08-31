@@ -7,7 +7,7 @@
 OPENIMP_SITE_METHOD = git
 OPENIMP_SITE = https://github.com/opensensor/openimp
 OPENIMP_SITE_BRANCH = main
-OPENIMP_VERSION = ace751e6edd0dad7ea884136f41eca9b058aba50
+OPENIMP_VERSION = 42c070fe83aefecd86daebc14f3bef23710c87a8
 
 # Upstream describes OpenIMP as MIT but does not currently ship a top-level
 # license file for legal-info to collect.
@@ -22,6 +22,7 @@ OPENIMP_PLATFORM_LOWER = $(shell echo $(SOC_FAMILY) | tr A-Z a-z)
 OPENIMP_TOOLCHAIN_PREFIX = $(patsubst %-,%,$(TARGET_CROSS))
 OPENIMP_OUTPUT_DIR = $(@D)/build/$(OPENIMP_PLATFORM_LOWER)
 OPENIMP_BUILT_LIB = $(BUILD_DIR)/openimp-$(OPENIMP_VERSION)/build/$(OPENIMP_PLATFORM_LOWER)/libimp.so
+OPENIMP_BUILT_TUNINGD = $(BUILD_DIR)/openimp-$(OPENIMP_VERSION)/build/$(OPENIMP_PLATFORM_LOWER)/openimp-tuningd
 
 ifneq ($(filter t40 t41,$(SOC_FAMILY)),)
 OPENIMP_DEPENDENCIES += thingino-raptor-hal
@@ -73,6 +74,8 @@ endef
 define OPENIMP_FINALIZE_TARGET
 	$(INSTALL) -D -m 0755 $(OPENIMP_BUILT_LIB) \
 		$(TARGET_DIR)/usr/lib/libimp.so
+	$(INSTALL) -D -m 0755 $(OPENIMP_BUILT_TUNINGD) \
+		$(TARGET_DIR)/usr/bin/openimp-tuningd
 endef
 OPENIMP_TARGET_FINALIZE_HOOKS += OPENIMP_FINALIZE_TARGET
 

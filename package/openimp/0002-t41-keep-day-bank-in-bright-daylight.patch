@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Thingino Project <thingino@thingino.com>
+Date: Mon, 31 Aug 2026 21:20:00 -0400
+Subject: [PATCH] t41: keep day bank in bright daylight
+
+The recovered bright-day BCSH bank produces neon green/cyan rendering on the
+Wyze Cam v4 after its IR-cut GPIO order is corrected.  A live same-frame A/B
+with the ordinary day bank removes the false color while preserving the T41
+security policy's bounded AWB and low-light transitions.
+
+Continue collecting bright-day evidence, but retain the ordinary day color
+model when it saturates.  Low-light selection remains unchanged.
+
+Signed-off-by: Thingino Project <thingino@thingino.com>
+---
+ src/openimp_tuning.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/openimp_tuning.c b/src/openimp_tuning.c
+index d074cc6..33d48de 100644
+--- a/src/openimp_tuning.c
++++ b/src/openimp_tuning.c
+@@ -517,6 +517,6 @@ static int tuning_feedback(OpenIMPTuningController *controller)
+         if (controller->bright_day_evidence >=
+             T41_SECURITY_BRIGHT_DAY_SAMPLES) {
+-            color_model = T41_COLOR_MODEL_BRIGHT_DAY;
++            color_model = T41_COLOR_MODEL_DAY;
+         } else if (controller->low_light_evidence >=
+                    T41_SECURITY_LOW_LIGHT_SAMPLES) {
+             color_model = T41_COLOR_MODEL_LOW_LIGHT;
+-- 
+2.51.0

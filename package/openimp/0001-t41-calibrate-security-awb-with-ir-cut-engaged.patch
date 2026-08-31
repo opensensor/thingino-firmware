@@ -1,0 +1,51 @@
+From 4c19174396198086d7b821af49e92ddb22ff03ab Mon Sep 17 00:00:00 2001
+From: Thingino Project <thingino@thingino.com>
+Date: Mon, 31 Aug 2026 19:45:00 -0400
+Subject: [PATCH] t41: calibrate security AWB with IR-cut engaged
+
+The previous OS04D10 daylight calibration was captured while the Wyze Cam
+v4 IR-cut GPIO pair was reversed.  With the filter physically engaged, the
+scene sampler reports G/R=1910 and G/B=1779 for the same daylight scene.
+The old 2500 blue-gain floor overrode that evidence and forced a blue or
+magenta cast even as the adaptive controller converged.
+
+Use the corrected-filter neutral point (2050/2150), adjust the sampler
+biases to converge on it, and let blue gain fall below the invalid 2500
+floor.  Low-light selection and bounded slew behavior are unchanged.
+
+Signed-off-by: Thingino Project <thingino@thingino.com>
+---
+ src/openimp_tuning.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/openimp_tuning.c b/src/openimp_tuning.c
+index 60743fa..d074cc6 100644
+--- a/src/openimp_tuning.c
++++ b/src/openimp_tuning.c
+@@ -48,17 +48,17 @@
+ #define T41_SECURITY_AWB_UPDATE_SAMPLES 5U
+ #define T41_SECURITY_AWB_SLEW_MAX 16
+ #define T41_SECURITY_AWB_DEADBAND 4
+-#define T41_SECURITY_AWB_RED_BIAS_Q10 1018U
+-#define T41_SECURITY_AWB_BLUE_BIAS_Q10 1111U
++#define T41_SECURITY_AWB_RED_BIAS_Q10 1100U
++#define T41_SECURITY_AWB_BLUE_BIAS_Q10 1238U
+ #define T41_SECURITY_AWB_RED_MIN 1000U
+ #define T41_SECURITY_AWB_RED_MAX 2400U
+-#define T41_SECURITY_AWB_BLUE_MIN 2500U
++#define T41_SECURITY_AWB_BLUE_MIN 1200U
+ #define T41_SECURITY_AWB_BLUE_MAX 5400U
+-#define T41_SECURITY_DAY_RED_GAIN 1476U
+-#define T41_SECURITY_DAY_BLUE_GAIN 3524U
++#define T41_SECURITY_DAY_RED_GAIN 2050U
++#define T41_SECURITY_DAY_BLUE_GAIN 2150U
+ #define T41_SECURITY_DAY_AE_TARGET 17600U
+-#define T41_SECURITY_BRIGHT_DAY_RED_GAIN 1908U
+-#define T41_SECURITY_BRIGHT_DAY_BLUE_GAIN 3092U
++#define T41_SECURITY_BRIGHT_DAY_RED_GAIN 2050U
++#define T41_SECURITY_BRIGHT_DAY_BLUE_GAIN 2150U
+ #define T41_SECURITY_BRIGHT_DAY_AE_TARGET 17600U
+ #define T41_SECURITY_LOW_LIGHT_RED_GAIN 1225U
+ #define T41_SECURITY_LOW_LIGHT_BLUE_GAIN 4850U
+-- 
+2.51.0
